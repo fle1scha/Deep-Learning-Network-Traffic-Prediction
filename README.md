@@ -2,9 +2,9 @@
 ## Ant To-Do:
 1. Combine Date and first-seen. DONE
 - Find way to get new Datetime variable into milliseconds or ordinal encoding. DONE
-2. Define binary holiday variable. 
-3. Fix preprocessing for SANREN[300something]
-4. Set limit on one-hot encoding unqiue values based off literature.
+2. Define binary holiday variable. DONE but can't compare Date column with date range for some reason.
+3. Fix preprocessing for SANREN[300something] DONE
+4. Set limit on one-hot encoding unqiue values based off literature. DONE - removed IPAddress categories
 5. Determine how to get LSTM to predict other variables. 
 6. Hyperparameter optimisation via literature.
 

@@ -2,19 +2,19 @@
 ## Ant To-Do:
 1. Combine Date and first-seen. DONE
 - Find way to get new Datetime variable into milliseconds or ordinal encoding. DONE
-2. Define binary holiday variable. DONE **but can't compare Date column with date range for some reason.**
-3. Fix preprocessing for SANREN[300something] DONE
-4. Set limit on one-hot encoding unqiue values based off literature. DONE - removed IPAddress categories
+2. Define binary holiday variable. 
+3. Fix preprocessing for SANREN[300something]
+4. Set limit on one-hot encoding unqiue values based off literature.
 5. Determine how to get LSTM to predict other variables. 
 6. Hyperparameter optimisation via literature.
 
 ## Research Questions to Answer
 1. How does the SANReN traffic data vary with time
 and day in relation to the South African university
-calendar? DONE - implemented UCT holidays. 
+calendar?
 2. Which of the LSTM architectures, baseline, bilateral
 or stacked, provides the highest prediction accuracy,
-subject to network constraints? 
+subject to network constraints?
 3. What is the computational cost of different LSTM?
 
 ## Theory

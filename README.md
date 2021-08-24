@@ -8,6 +8,10 @@
 5. Determine how to get LSTM to predict other variables. 
 6. Hyperparameter optimisation via literature.
 
+## Just To-Do:
+1. Create Mean Squared Error for training set as well
+2. Co-efficient of Determination on test sets
+
 ## Research Questions to Answer
 1. How does the SANReN traffic data vary with time
 and day in relation to the South African university
@@ -24,7 +28,7 @@ subject to network constraints?
 4. Understanding LSTMS https://colah.github.io/posts/2015-08-Understanding-LSTMs/
 
 ## Josiah suggestions
-1. Field for internal or external IP addresses. Geolococation method. 
+1. Field for internal or external IP addresses. Geolococation method. (UNLIKELY)
 2. Will doubling the number of data points double the training time? Grid search over data points and training times and report.
 3. Dataset size vs accuracy 
 4. Training time vs accuracy

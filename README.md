@@ -26,6 +26,7 @@ subject to network constraints?
 2. Adam Optimization https://www.coursera.org/lecture/deep-neural-network/adam-optimization-algorithm-w9VCZ?utm_campaign=The%20Batch&utm_medium=email&_hsmi=148614359&utm_content=148611472&utm_source=hs_email
 3. Illustrated Guide to LSTMs https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21
 4. Understanding LSTMS https://colah.github.io/posts/2015-08-Understanding-LSTMs/
+5. Performance Metrics in Machine Learning [Complete Guide] https://neptune.ai/blog/performance-metrics-in-machine-learning-complete-guide
 
 ## Josiah suggestions
 1. Field for internal or external IP addresses. Geolococation method. (UNLIKELY)

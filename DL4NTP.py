@@ -245,14 +245,12 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     #model.fit(X_train, y_train, epochs = epochs, verbose = 0)
 
-    
-    
-
     # fit model
     train_rmse, test_rmse = list(), list()
     for i in range(epochs):
         model.fit(X_train, y_train, epochs=1,
                     batch_size=batch_size, verbose=1, shuffle=False)
+        loss_per_epoch = model.history.history['loss']
         model.reset_states()
         train_yhat = model.predict(X_train, verbose=0)
         test_yhat = model.predict(X_test, verbose=0)
@@ -261,7 +259,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
         test_rmse.append(evaluate(test_yhat, y_test))
         model.reset_states()
 
-        loss_per_epoch = model.history.history['loss']
+        
     history = pd.DataFrame()
     history['train'], history['test'] = train_rmse, test_rmse
     return history, loss_per_epoch, train_yhat, test_yhat
@@ -335,7 +333,7 @@ if __name__ == "__main__":
     y_test_scaled = scale(y_test)
 
     for i in range(9):
-        history, loss, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled,
+        history, loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled,
                                 x_test_scaled, y_test_scaled, 1, 10, 50)
         plt.plot(history['train'], color='blue')
         plt.plot(history['test'], color='orange')
@@ -344,8 +342,8 @@ if __name__ == "__main__":
     
     plt.show()
 
-    #loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
-    #loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
+    loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
+    loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
 
     view = input(
         "View the predicted yhat values for the test and training sets? [Y/N]\n")

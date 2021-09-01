@@ -212,6 +212,27 @@ class DL4NTP:
         test_yhat = model.predict(X_test, verbose = 0)
 
         return loss_per_epoch, train_yhat, test_yhat
+    
+    def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
+        X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
+        X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
+        
+        n_features = X_train.shape[2]
+        model = Sequential()
+        model.add(LSTM(50, return_sequences=True, activation="sigmoid",
+                       input_shape=(batch_size, n_features)))
+        model.add(LSTM(50, return_sequences=True))
+        model.add(LSTM(50))
+        model.add(Dense(1))        
+        model.compile(loss='mse', optimizer='adam')
+        
+        model.fit(X_train, y_train, epochs=epochs, verbose=0)
+
+        loss_per_epoch = model.history.history['loss']
+        train_yhat = model.predict(X_train, verbose=0)
+        test_yhat = model.predict(X_test, verbose=0)
+        
+        return loss_per_epoch, train_yhat, test_yhat
 
     def view_yhat(y_train_scaled, yhat_train, y_test_scaled, yhat_test):
         plt.scatter(y_train_scaled, yhat_train,  label='Training set')
@@ -242,23 +263,44 @@ class DL4NTP:
 
         loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
         loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
+        loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
         
         view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
         if (view == 'Y'):
             view_yhat(y_train_scaled, yhat_train_simple, y_test_scaled, yhat_test_simple)
             view_yhat(y_train_scaled, yhat_train_bi, y_test_scaled, yhat_test_bi)
+            #view_yhat(y_train_scaled, yhat_train_stacked, y_test_scaled, yhat_test_stacked)
             plt.show()
 
-            view = input("View the loss graph of the simple LSTM\'s training process?")
-
+            view = input("View the loss graph of the LSTM\'s training process?\n")
+            lstm = ""
             if view == 'Y':
+                lstm = input("View Simple, Stacked or Bi?\n") # Enter
+
+            if lstm == 'Simple':
                 plt.xlabel('Epoch')
                 plt.ylabel('Loss')
                 plt.plot(range(len(loss_simple)), loss_simple)
                 plt.show()
 
 
-        
+            if lstm == 'Simple':
+                plt.xlabel('Epoch')
+                plt.ylabel('Loss')
+                plt.plot(range(len(loss_simple)), loss_simple)
+                plt.show()
+                
+            if lstm == 'Stacked':
+                plt.xlabel('Epoch')
+                plt.ylabel('Loss')
+                plt.plot(range(len(loss_stacked)), loss_stacked)
+                plt.show()
+
+            if lstm == 'Bi':
+                plt.xlabel('Epoch')
+                plt.ylabel('Loss')
+                plt.plot(range(len(loss_bidirectional)), loss_bidirectional)
+                plt.show()
        
         
     

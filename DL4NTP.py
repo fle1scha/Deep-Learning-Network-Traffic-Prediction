@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import pandas as pd
-
 import datetime as dt
 
 from datetime import datetime, date
@@ -33,6 +32,9 @@ def readData(filename):
     return SANReN   
 
 def preprocess(data):
+    '''
+    Preprocesses the data.
+    '''
     headings_line = data[0].split()
     # Merge 'Src', 'IP', and 'Addr:Port'
     headings_line[4:7] = [''.join(headings_line[4:7])]
@@ -117,6 +119,9 @@ def preprocess(data):
     return df
 
 def format(df):
+    '''
+    Formats the dataframe column correctly. 
+    '''
     print('Formatting dataframe columns...')
     df['Datetimetemp'] = df['Date'] + ' ' + \
         df['first-seen']  # Combine Date and first-seen
@@ -166,6 +171,9 @@ def format(df):
     return df
 
 def viewDistributions(df):
+    '''
+    Visualises the distributions of the explanatory variables. 
+    '''
     # Explore individual categories
     groups = [1, 5, 6, 7, 8, 9]
     values = df.values
@@ -181,6 +189,9 @@ def viewDistributions(df):
     plt.show()
 
 def split(df):
+    '''
+    Splits the data into test and train, as well as the respective x and y sections of both subsets. 
+    '''
     train, test = train_test_split(
         df, test_size=0.2, random_state=42, shuffle=True)
     # Drop target variable from training data.
@@ -208,6 +219,9 @@ def split(df):
     return x_train, y_train, x_test, y_test
 
 def scale(data):
+    '''
+    Scales data to the range 0 - 1, but this can be passed in as a parameter if we want. 
+    '''
     # Scale training dating
     # scikit MinMixScaler allows all variables to be normalised between 0 and 1.
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -218,9 +232,16 @@ def scale(data):
     return scaled_data
 
 def rmse(y_true, y_pred):
+    '''
+    Another RMSE method. Unsure how to implement correctly, but I think it uses a y_pred and y_true that are in a dataframe. 
+    If so, then I agree, we should put y_pred and y_true into a dataframe for further results analysis. @Justin
+    '''
     return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
 
 def evaluate(yhat, y):
+    '''
+    Calculates the RMSE of a model.
+    '''
     rmse = 0
     for i in range(len(yhat)):
         rmse += (yhat[i]-y[i])**2
@@ -230,7 +251,10 @@ def evaluate(yhat, y):
     return rmse
 
 def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
-
+    '''
+    Builds and trains the baseline LSTM model. We have to edit the dataframe to remove entries so that the lag/timesteps can be > 1. This 
+    then affects how we will reshape the X_train into the correct 3D format for the model. @Ant currently working on ot. 
+    '''
     # We need to figure out how to reshape effectively. This is linked to the comment below. If the middle parameter here is 1 then batch_size is 1.
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
@@ -274,6 +298,9 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     return history, loss_per_epoch, train_yhat, test_yhat'''
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
+    '''
+    Builds and trains a bidirectional LSTM. 
+    '''
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
 
@@ -294,6 +321,10 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     return loss_per_epoch, train_yhat, test_yhat
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
+    '''
+    Builds and trains a stacked LSTM. We could break this down into a method that creates the model and then a method that does
+    the prediction. @Justin
+    '''
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
 
@@ -316,22 +347,31 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     return loss_per_epoch, train_yhat, test_yhat
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
-    plt.scatter(y_train, y_unscale(y_train, yhat_train), alpha = 0.5, marker = '.', label='Training set')
-    plt.scatter(y_test, y_unscale(y_train, yhat_test), alpha = 0.5, marker = '.', label='Test set')
+    '''
+    Constructs a scatter plot of obs vs pred for training and test data.
+    '''
+    plt.scatter(y_train/1000000, y_unscale(y_train, yhat_train)/1000000, alpha = 0.5, marker = '.', label='Training set')
+    plt.scatter(y_test/1000000, y_unscale(y_train, yhat_test)/1000000, alpha = 0.5, marker = '.', label='Test set')
     plt.title(name)
-    plt.plot([0, 1], [0, 1],color='green',linewidth=1) #This was plotting a straight line through the graph.
+    #plt.plot([0, max(y_train/1000000)], [0, max(y_train/1000000)],color='green',linewidth=1) #This was plotting a straight line through the graph.
 
 def plotLoss(loss):
+    '''
+    Plots the loss graph of an LSTM based off model.history.history['loss']
+    '''
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.plot(range(len(loss)), loss)
     plt.show()
 
-def y_unscale(y, yhat ):
-        Yscaler = MinMaxScaler(feature_range=(0, 1)) #apply same normalisation to response. 
-        Yscaler.fit(y)
-        y_pred = Yscaler.inverse_transform(yhat)
-        return y_pred
+def y_unscale(y, yhat):
+    '''
+    Unscales a predicted y observation.
+    '''
+    Yscaler = MinMaxScaler(feature_range=(0, 1)) #apply same normalisation to response. 
+    Yscaler.fit(y)
+    y_pred = Yscaler.inverse_transform(yhat)
+    return y_pred
         
 if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
@@ -374,10 +414,17 @@ if __name__ == "__main__":
         except: 
             print("Please enter a number.\n")
      
+    '''
+    We must make sure we understand what the parameters do.
+    - Neurons: 
+    - Epochs:
+    - Timesteps: 
+    - Batchsize: 
+    '''
     loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons) #timesteps (lag), epochs, neurons
     loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
     loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-    
+
     view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
         plt.subplot(1, 3, 1)

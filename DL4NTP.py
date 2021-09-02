@@ -316,15 +316,9 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     return loss_per_epoch, train_yhat, test_yhat
 
 def view_yhat(y_train_scaled, yhat_train, y_test_scaled, yhat_test):
-    plt.scatter(y_train_scaled, yhat_train,  label='Training set')
-    plt.scatter(y_test_scaled, yhat_test, label='Test set')
-    # plt.plot([min(y_train_scaled), max(y_train_scaled)], [min(yhat_train), max(yhat_train)],color='green',linewidth=2) #This was plotting a straight line through the graph.
-    plt.legend()
-    plt.xlabel('Observed Value')
-    plt.ylabel('Predicted Value')
-    plt.title('Training and Test Set: Predicted Values vs Observed Values ')
-
-    # plt.show()
+    plt.scatter(y_train_scaled, yhat_train, alpha = 0.5, marker = '.', label='Training set')
+    plt.scatter(y_test_scaled, yhat_test, alpha = 0.5, marker = '.', label='Test set')
+    plt.plot([0, 1], [0, 1],color='green',linewidth=1) #This was plotting a straight line through the graph.
 
 def plotLoss(loss):
     plt.xlabel('Epoch')
@@ -359,31 +353,40 @@ if __name__ == "__main__":
                 (i, history['train'].iloc[-1], history['test'].iloc[-1]))
     '''
     
-    loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20) #timesteps (lag), epochs, neurons
-    loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20)
+    epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
+    while (epochs < 0):
+        try:
+            epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
+        except: 
+            print("Please enter a number.\n")
+    
+    neurons  = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+    while (neurons < 0):
+        try:
+            neurons = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+        except: 
+            print("Please enter a number.\n")
+     
+    loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons) #timesteps (lag), epochs, neurons
+    loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
 
     view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
-        view_yhat(y_train_scaled, yhat_train_simple,
-                    y_test_scaled, yhat_test_simple)
-        view_yhat(y_train_scaled, yhat_train_bi,
-                    y_test_scaled, yhat_test_bi)
-        view_yhat(y_train_scaled, yhat_train_stacked,
-                    y_test_scaled, yhat_test_stacked)
+        fig, ax = plt.subplot(1, 3)
+        fig.suptitle("Observed vs Predicted for Different LSTMs")
+        view_yhat(y_train_scaled, yhat_train_simple,y_test_scaled, yhat_test_simple)
+        plt.title(')
+        plt.legend()
+        plt.subplot(1, 3, 2)
+        view_yhat(y_train_scaled, yhat_train_bi,y_test_scaled, yhat_test_bi)
+        plt.subplot(1, 3, 3)
+        view_yhat(y_train_scaled, yhat_train_stacked,y_test_scaled, yhat_test_stacked)
         plt.show()
 
-        view = input(
-            "View the loss graph of the LSTM\'s training process?\n")
-        lstm = ""
-        if view == 'Y':
-            lstm = input("View Simple, Stacked or Bi?\n")  # Enter
-
-        if lstm == 'Simple':
-            plotLoss(loss_simple)
-
-        elif lstm == 'Stacked':
-            plotLoss(loss_stacked)
-
-        elif lstm == 'Bi':
-            plotLoss(loss_bidirectional)
+        view = input("View the loss graph of the LSTM\'s training process?\n")
+        if view == 'Y': 
+            lstm = input("View Simple, Stacked or Bidirectional?\n")  # Enter
+            if lstm == 'Simple': plotLoss(loss_simple)
+            elif lstm == 'Stacked': plotLoss(loss_stacked)
+            elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)

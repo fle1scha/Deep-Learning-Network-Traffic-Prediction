@@ -315,9 +315,10 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     return loss_per_epoch, train_yhat, test_yhat
 
-def view_yhat(y_train_scaled, yhat_train, y_test_scaled, yhat_test):
-    plt.scatter(y_train_scaled, yhat_train, alpha = 0.5, marker = '.', label='Training set')
-    plt.scatter(y_test_scaled, yhat_test, alpha = 0.5, marker = '.', label='Test set')
+def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
+    plt.scatter(y_train, y_unscale(y_train, yhat_train), alpha = 0.5, marker = '.', label='Training set')
+    plt.scatter(y_test, y_unscale(y_train, yhat_test), alpha = 0.5, marker = '.', label='Test set')
+    plt.title(name)
     plt.plot([0, 1], [0, 1],color='green',linewidth=1) #This was plotting a straight line through the graph.
 
 def plotLoss(loss):
@@ -326,6 +327,12 @@ def plotLoss(loss):
     plt.plot(range(len(loss)), loss)
     plt.show()
 
+def y_unscale(y, yhat ):
+        Yscaler = MinMaxScaler(feature_range=(0, 1)) #apply same normalisation to response. 
+        Yscaler.fit(y)
+        y_pred = Yscaler.inverse_transform(yhat)
+        return y_pred
+        
 if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
     df = preprocess(SANREN)
@@ -370,23 +377,20 @@ if __name__ == "__main__":
     loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons) #timesteps (lag), epochs, neurons
     loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
     loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-
+    
     view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
-        fig, ax = plt.subplot(1, 3)
-        fig.suptitle("Observed vs Predicted for Different LSTMs")
-        view_yhat(y_train_scaled, yhat_train_simple,y_test_scaled, yhat_test_simple)
-        plt.title(')
-        plt.legend()
+        plt.subplot(1, 3, 1)
+        view_yhat(y_train, yhat_train_simple,y_test, yhat_test_simple, "Simple")
         plt.subplot(1, 3, 2)
-        view_yhat(y_train_scaled, yhat_train_bi,y_test_scaled, yhat_test_bi)
+        view_yhat(y_train, yhat_train_bi, y_test, yhat_test_bi, "Bidirectional")
         plt.subplot(1, 3, 3)
-        view_yhat(y_train_scaled, yhat_train_stacked,y_test_scaled, yhat_test_stacked)
+        view_yhat(y_train, yhat_train_stacked,y_test, yhat_test_stacked, "Stacked")
         plt.show()
 
-        view = input("View the loss graph of the LSTM\'s training process?\n")
-        if view == 'Y': 
-            lstm = input("View Simple, Stacked or Bidirectional?\n")  # Enter
-            if lstm == 'Simple': plotLoss(loss_simple)
-            elif lstm == 'Stacked': plotLoss(loss_stacked)
-            elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)
+    view = input("View the loss graph of the LSTM\'s training process?\n")
+    if view == 'Y': 
+        lstm = input("View Simple, Stacked or Bidirectional?\n")  # Enter
+        if lstm == 'Simple': plotLoss(loss_simple)
+        elif lstm == 'Stacked': plotLoss(loss_stacked)
+        elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)

@@ -243,9 +243,17 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     model.add(Dense(1))
     model.compile(optimizer='adam', loss='mse')
 
-    #model.fit(X_train, y_train, epochs = epochs, verbose = 0)
+    print("Training Baseline LSTM...")
+    model.fit(X_train, y_train, epochs = epochs, verbose = 1)
 
-    # fit model
+    loss_per_epoch = model.history.history['loss']
+    train_yhat = model.predict(X_train, verbose=0)
+    test_yhat = model.predict(X_test, verbose=0)
+
+    return loss_per_epoch, train_yhat, test_yhat
+
+    #This has been commented out for now. It controls the epoch hyperparameter search. 
+    '''# fit model 
     train_rmse, test_rmse = list(), list()
     for i in range(epochs):
         model.fit(X_train, y_train, epochs=1,
@@ -259,10 +267,11 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
         test_rmse.append(evaluate(test_yhat, y_test))
         model.reset_states()
 
+
         
     history = pd.DataFrame()
     history['train'], history['test'] = train_rmse, test_rmse
-    return history, loss_per_epoch, train_yhat, test_yhat
+    return history, loss_per_epoch, train_yhat, test_yhat'''
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
@@ -275,7 +284,8 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam')
 
-    model.fit(X_train, y_train, epochs=epochs, verbose=0)
+    print("Training Bidirectional LSTM...")
+    model.fit(X_train, y_train, epochs=epochs, verbose=1)
 
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
@@ -289,14 +299,15 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     n_features = X_train.shape[2]
     model = Sequential()
-    model.add(LSTM(50, return_sequences=True, activation="sigmoid",
+    model.add(LSTM(neurons, return_sequences=True, activation="sigmoid",
                     input_shape=(batch_size, n_features)))
-    model.add(LSTM(50, return_sequences=True))
-    model.add(LSTM(50))
+    model.add(LSTM(neurons, return_sequences=True))
+    model.add(LSTM(neurons))
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam')
 
-    model.fit(X_train, y_train, epochs=epochs, verbose=0)
+    print("Training Stacked LSTM...")
+    model.fit(X_train, y_train, epochs=epochs, verbose=1)
 
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
@@ -315,13 +326,18 @@ def view_yhat(y_train_scaled, yhat_train, y_test_scaled, yhat_test):
 
     # plt.show()
 
+def plotLoss(loss):
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.plot(range(len(loss)), loss)
+    plt.show()
+
 if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
     df = preprocess(SANREN)
     df = format(df)
 
-    view = input(
-        "View the distribution of the explanatory features? [Y/N]\n")
+    view = input("View the distribution of the explanatory features? [Y/N]\n")
     if (view == 'Y'):
         viewDistributions(df)
 
@@ -332,6 +348,8 @@ if __name__ == "__main__":
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
 
+     #This has been commented out for now. It controls the epoch hyperparameter search. 
+    '''
     for i in range(9):
         history, loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled,
                                 x_test_scaled, y_test_scaled, 1, 10, 50)
@@ -339,14 +357,13 @@ if __name__ == "__main__":
         plt.plot(history['test'], color='orange')
         print('%d) TrainRMSE=%f, TestRMSE=%f' %
                 (i, history['train'].iloc[-1], history['test'].iloc[-1]))
+    '''
     
-    plt.show()
+    loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20) #timesteps (lag), epochs, neurons
+    loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20)
+    loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 10, 20)
 
-    loss_bidirectional, yhat_train_bi, yhat_test_bi = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, 100, 50)
-
-    view = input(
-        "View the predicted yhat values for the test and training sets? [Y/N]\n")
+    view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
         view_yhat(y_train_scaled, yhat_train_simple,
                     y_test_scaled, yhat_test_simple)
@@ -363,25 +380,10 @@ if __name__ == "__main__":
             lstm = input("View Simple, Stacked or Bi?\n")  # Enter
 
         if lstm == 'Simple':
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.plot(range(len(loss_simple)), loss_simple)
-            plt.show()
+            plotLoss(loss_simple)
 
-        if lstm == 'Simple':
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.plot(range(len(loss_simple)), loss_simple)
-            plt.show()
+        elif lstm == 'Stacked':
+            plotLoss(loss_stacked)
 
-        if lstm == 'Stacked':
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.plot(range(len(loss_stacked)), loss_stacked)
-            plt.show()
-
-        if lstm == 'Bi':
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.plot(range(len(loss_bidirectional)), loss_bidirectional)
-            plt.show()
+        elif lstm == 'Bi':
+            plotLoss(loss_bidirectional)

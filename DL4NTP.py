@@ -274,11 +274,14 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     toc = time.perf_counter() # Time at end of training
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
+    tic2 = time.perf_counter()
     test_yhat = model.predict(X_test, verbose=0)
+    toc2 = time.perf_counter()
     
     simple_lstm_train_time = toc - tic
+    simple_lstm_prediction_time = toc2 - tic2
 
-    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time
+    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time
 
     #This has been commented out for now. It controls the epoch hyperparameter search. 
     '''# fit model 
@@ -322,11 +325,14 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
 
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
+    tic2 = time.perf_counter()
     test_yhat = model.predict(X_test, verbose=0)
+    toc2 = time.perf_counter()
     
     bidirectional_lstm_train_time = toc - tic
+    bidirectional_lstm_prediction_time = toc2 - tic2
 
-    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time
+    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
@@ -352,11 +358,14 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
+    tic2 = time.perf_counter()
     test_yhat = model.predict(X_test, verbose=0)
+    toc2 = time.perf_counter()
     
     stacked_lstm_training_time = toc - tic
+    stacked_lstm_prediction_time = toc2 - tic2
 
-    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time
+    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
@@ -434,9 +443,11 @@ if __name__ == "__main__":
     - Batchsize: 
     '''
     
-    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time = simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons) #timesteps (lag), epochs, neurons
-    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time = bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time = simpleLSTM(
+        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
+    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time = bidirectionalLSTM(
+        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time = stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
 
     view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
@@ -455,6 +466,25 @@ if __name__ == "__main__":
         elif lstm == 'Stacked': plotLoss(loss_stacked)
         elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)
 
-    print(f"Simple LSTM Training in {simple_lstm_train_time:0.4f} seconds over {epochs} epochs")
-    print(f"Bidirectional LSTM Training in {bidirectional_lstm_train_time:0.4f} seconds over {epochs} epochs")
-    print(f"Stacked LSTM Training in {stacked_lstm_training_time:0.4f} seconds over {epochs} epochs")
+    # Computational cost metrics to determine difference in changing paramaters
+    print(f"Simple Training: {simple_lstm_train_time:0.4f} seconds, {epochs} epochs")
+    print(f"Simple Prediction: {simple_lstm_prediction_time:0.4f} seconds")
+    print(f"Bidirectional Training: {bidirectional_lstm_train_time:0.4f} seconds, {epochs} epochs")
+    print(f"Bidirectional Prediction: {bidirectional_lstm_prediction_time:0.4f} seconds")
+    print(f"Stacked Training: {stacked_lstm_training_time:0.4f} seconds, {epochs} epochs")
+    print(f"Stacked Prediction: {stacked_lstm_prediction_time:0.4f} seconds")
+    
+    metricsFile = open('Metrics.txt', 'a')
+    metricsFile.write(
+        f"Simple Training: {simple_lstm_train_time:0.4f} seconds, {epochs} epochs\n")
+    metricsFile.write(
+        f"Simple Prediction: {simple_lstm_prediction_time:0.4f} seconds\n")
+    metricsFile.write(
+        f"Bidirectional Training: {bidirectional_lstm_train_time:0.4f} seconds, {epochs} epochs\n")
+    metricsFile.write(
+        f"Bidirectional Prediction: {bidirectional_lstm_prediction_time:0.4f} seconds\n")
+    metricsFile.write(
+        f"Stacked Training: {stacked_lstm_training_time:0.4f} seconds, {epochs} epochs\n")
+    metricsFile.write(
+        f"Stacked Prediction: {stacked_lstm_prediction_time:0.4f} seconds\n")                 
+    metricsFile.write("\n")

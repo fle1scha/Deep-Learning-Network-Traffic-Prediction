@@ -1,0 +1,13 @@
+Simple LSTM Training in 3.2085 seconds, 20 epochs
+Simple LSTM Prediction: 0.1982 seconds
+Bidirectional LSTM Training in 3.0155 seconds, 20 epochs
+Bidirectional LSTM Prediction: 0.3504 seconds
+Stacked LSTM Training in 6.1473 seconds, 20 epochs
+Stacked LSTM Prediction: 0.9132 seconds
+
+Simple Training: 3.7851 seconds, 40 epochs
+Simple Prediction: 0.2685 seconds
+Bidirectional Training: 4.6021 seconds, 40 epochs
+Bidirectional Prediction: 0.4463 seconds
+Stacked Training: 8.7801 seconds, 40 epochs
+Stacked Prediction: 0.8915 seconds

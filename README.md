@@ -1,9 +1,9 @@
 # DL4NTP
 ## Ant To-Do:
-1. Combine Date and first-seen. DONE
-- Find way to get new Datetime variable into milliseconds or ordinal encoding. DONE
+1. Combine Date and first-seen - DONE
+- Find way to get new Datetime variable into milliseconds or ordinal encoding - DONE
 2. Define binary holiday variable. 
-3. Fix preprocessing for SANREN[300something]
+3. Fix preprocessing for SANREN[300something] - DONE
 4. Set limit on one-hot encoding unqiue values based off literature.
 5. Determine how to get LSTM to predict other variables. 
 6. Hyperparameter optimisation via literature.
@@ -14,8 +14,8 @@ and day in relation to the South African university
 calendar?
 2. Which of the LSTM architectures, baseline, bilateral
 or stacked, provides the highest prediction accuracy,
-subject to network constraints?
-3. What is the computational cost of different LSTM?
+subject to network constraints? - Stacked highest, Bidirectional lowest
+3. What is the computational cost of different LSTM? - Simple lowest, Stacked highest
 
 ## Theory
 1. Deep Learning Basics https://colab.research.google.com/github/lexfridman/mit-deep-learning/blob/master/tutorial_deep_learning_basics/deep_learning_basics.ipynb

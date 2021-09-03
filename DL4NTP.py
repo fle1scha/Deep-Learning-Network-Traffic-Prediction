@@ -7,6 +7,7 @@ import os
 import pandas as pd
 import datetime as dt
 import time
+import csv
 
 from datetime import datetime, date
 import keras.backend as K
@@ -47,7 +48,7 @@ def preprocess(data):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    for i in range(1, 1001):
+    for i in range(1, 32001):
         data_line = data[i].split()
 
         if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
@@ -459,32 +460,32 @@ if __name__ == "__main__":
         view_yhat(y_train, yhat_train_stacked,y_test, yhat_test_stacked, "Stacked")
         plt.show()
 
-    view = input("View the loss graph of the LSTM\'s training process?\n")
+    view = input("View the loss graph of the LSTM\'s training process? [Y/N]\n")
     if view == 'Y': 
         lstm = input("View Simple, Stacked or Bidirectional?\n")  # Enter
         if lstm == 'Simple': plotLoss(loss_simple)
         elif lstm == 'Stacked': plotLoss(loss_stacked)
         elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)
 
-    # Computational cost metrics to determine difference in changing paramaters
-    print(f"Simple Training: {simple_lstm_train_time:0.4f} seconds, {epochs} epochs")
-    print(f"Simple Prediction: {simple_lstm_prediction_time:0.4f} seconds")
-    print(f"Bidirectional Training: {bidirectional_lstm_train_time:0.4f} seconds, {epochs} epochs")
-    print(f"Bidirectional Prediction: {bidirectional_lstm_prediction_time:0.4f} seconds")
-    print(f"Stacked Training: {stacked_lstm_training_time:0.4f} seconds, {epochs} epochs")
-    print(f"Stacked Prediction: {stacked_lstm_prediction_time:0.4f} seconds")
+    # Computational cost metrics to determine difference in changing paramaters    
+    # metricsFile = open('Metrics.txt', 'a')
+    # metricsFile.write(f"DATSET SIZE: {2000}, EPOCHS: {epochs}, NEURONS: {neurons}\n")
+    # metricsFile.write(
+    #     f"Simple Training: {simple_lstm_train_time:0.4f} seconds\n")
+    # metricsFile.write(
+    #     f"Simple Prediction: {simple_lstm_prediction_time:0.4f} seconds\n")
+    # metricsFile.write(
+    #     f"Bidirectional Training: {bidirectional_lstm_train_time:0.4f} seconds\n")
+    # metricsFile.write(
+    #     f"Bidirectional Prediction: {bidirectional_lstm_prediction_time:0.4f} seconds\n")
+    # metricsFile.write(
+    #     f"Stacked Training: {stacked_lstm_training_time:0.4f} seconds\n")
+    # metricsFile.write(
+    #     f"Stacked Prediction: {stacked_lstm_prediction_time:0.4f} seconds\n")                 
+    # metricsFile.write("\n")
     
-    metricsFile = open('Metrics.txt', 'a')
-    metricsFile.write(
-        f"Simple Training: {simple_lstm_train_time:0.4f} seconds, {epochs} epochs\n")
-    metricsFile.write(
-        f"Simple Prediction: {simple_lstm_prediction_time:0.4f} seconds\n")
-    metricsFile.write(
-        f"Bidirectional Training: {bidirectional_lstm_train_time:0.4f} seconds, {epochs} epochs\n")
-    metricsFile.write(
-        f"Bidirectional Prediction: {bidirectional_lstm_prediction_time:0.4f} seconds\n")
-    metricsFile.write(
-        f"Stacked Training: {stacked_lstm_training_time:0.4f} seconds, {epochs} epochs\n")
-    metricsFile.write(
-        f"Stacked Prediction: {stacked_lstm_prediction_time:0.4f} seconds\n")                 
-    metricsFile.write("\n")
+    # Computational cost metrics to determine difference in changing paramaters
+    data = [32000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, stacked_lstm_training_time, stacked_lstm_prediction_time]
+    with open('ComputationalMetrics.csv', 'a', newline = '') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)

@@ -48,7 +48,7 @@ def preprocess(data):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    for i in range(1, 32001):
+    for i in range(1, 8001):
         data_line = data[i].split()
 
         if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
@@ -349,6 +349,9 @@ def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
     plt.scatter(y_train/1000000, y_unscale(y_train, yhat_train)/1000000, alpha = 0.5, marker = '.', label='Training set')
     plt.scatter(y_test/1000000, y_unscale(y_train, yhat_test)/1000000, alpha = 0.5, marker = '.', label='Test set')
+    plt.xlabel('True Value')
+    plt.ylabel('Predicted Value')
+    plt.legend()
     plt.title(name)
     
 def plotLoss(loss):
@@ -443,7 +446,7 @@ if __name__ == "__main__":
         elif lstm == 'Bidirectional': plotLoss(loss_bidirectional)
     
     # Computational cost metrics to determine difference in changing paramaters
-    data = [2000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
+    data = [8000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
             stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse]
     with open('data.csv', 'a', newline = '') as f:
         writer = csv.writer(f)

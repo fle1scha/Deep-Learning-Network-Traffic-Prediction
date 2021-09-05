@@ -260,10 +260,6 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     test_yhat = model.predict(X_test, verbose=0)
     toc2 = time.perf_counter()
     
-    simple_train_mae = mean_absolute_error(y_train, train_yhat)
-    simple_test_mae = mean_absolute_error(y_test, test_yhat)
-    simple_train_mse = mean_squared_error(y_train, train_yhat)
-    simple_test_mse = mean_squared_error(y_test, test_yhat)
     
     simple_lstm_train_time = toc - tic
     simple_lstm_prediction_time = toc2 - tic2
@@ -288,7 +284,12 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
         
     # history = pd.DataFrame()
     # history['train'], history['test'] = train_rmse, test_rmse
-    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time
+
+def metrics(y, yhat):
+    MAE = mean_absolute_error(y, yhat)
+    MSE = mean_squared_error(y, yhat)
+    return MAE, MSE
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
@@ -317,13 +318,8 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     
     bidirectional_lstm_train_time = toc - tic
     bidirectional_lstm_prediction_time = toc2 - tic2
-    
-    bidirectional_train_mae = mean_absolute_error(y_train, train_yhat)
-    bidirectional_test_mae = mean_absolute_error(y_test, test_yhat)
-    bidirectional_train_mse = mean_squared_error(y_train, train_yhat)
-    bidirectional_test_mse = mean_squared_error(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
@@ -355,13 +351,8 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     
     stacked_lstm_training_time = toc - tic
     stacked_lstm_prediction_time = toc2 - tic2
-    
-    stacked_train_mae = mean_absolute_error(y_train, train_yhat)
-    stacked_test_mae = mean_absolute_error(y_test, test_yhat)
-    stacked_train_mse = mean_squared_error(y_train, train_yhat)
-    stacked_test_mse = mean_squared_error(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
@@ -439,12 +430,27 @@ if __name__ == "__main__":
     - Batchsize: 
     '''
     
-    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
-        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
-    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse = bidirectionalLSTM(
-        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse = stackedLSTM(
-        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    #Simple LSTM
+    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time  = \
+        simpleLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
+    
+    simple_train_mae, simple_train_mse = metrics(y_train, yhat_train_simple)
+    simple_test_mae, simple_test_mse = metrics(y_test, yhat_test_simple)
+    
+    #Bidirectional LSTM
+    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time = \
+        bidirectionalLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+
+    bi_train_mae, bi_train_mse = metrics(y_train, yhat_train_bi)
+    bi_test_mae, bi_test_mse = metrics(y_test, yhat_test_bi)
+
+    #Stacked LSTM
+    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time = \
+        stackedLSTM(x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    
+    stacked_train_mae, stacked_train_mse = metrics(y_train, yhat_train_stacked)
+    stacked_test_mae, stacked_test_mse = metrics(y_test, yhat_test_stacked)
+
 
     view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     if (view == 'Y'):
@@ -482,7 +488,7 @@ if __name__ == "__main__":
     
     # Computational cost metrics to determine difference in changing paramaters
     data = [1000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
-            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse]
+            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bi_train_mae, bi_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bi_train_mse, bi_test_mse, stacked_train_mse, stacked_test_mse]
     with open('ComputationalMetrics.csv', 'a', newline = '') as f:
         writer = csv.writer(f)
         writer.writerow(data)

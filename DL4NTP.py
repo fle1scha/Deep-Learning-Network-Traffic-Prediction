@@ -48,7 +48,7 @@ def preprocess(data):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    for i in range(1, 1001):
+    for i in range(1, 2000):
         data_line = data[i].split()
 
         if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
@@ -385,6 +385,14 @@ if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
     df = preprocess(SANREN)
     df = format(df)
+
+    file = input("Would you like to load another dataset file? [Y/N]\n")
+    if (file == 'Y'):
+        filename = input("Enter filename: ")
+        SANREN_2 = readData(str(filename))
+        df2 = preprocess(SANREN_2)
+        df2 = format(df2)
+        df = df.add(df2, fill_value=0)
 
     view = input("View the distribution of the explanatory features? [Y/N]\n")
     if (view == 'Y'):

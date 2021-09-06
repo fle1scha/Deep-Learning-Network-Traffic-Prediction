@@ -133,7 +133,8 @@ def format(df):
         df['first-seen']  # Combine Date and first-seen
     df = df.astype({'Date': 'datetime64[ns]'})
     df["Day"] = df['Date'].dt.dayofweek  # Created Day variable.
-    df = df.astype({'first-seen': np.datetime64})
+    df = df.astype({'Date': str})
+    #df = df.astype({'first-seen': np.datetime64})
     df = df.astype({'Duration': np.float64})
     df = df.astype({"SrcIPAddr:Port": str})
     df = df.astype({"DstIPAddr:Port": str})
@@ -156,21 +157,16 @@ def format(df):
     df['Datetime'] = df.Datetime.astype('int64')
 
     # Define university holiday calender
-    holidays = pd.date_range(start='2020-1-1', end='2020-3-14', freq='1D')
-    holidays = holidays.append(pd.date_range(
-        start='2020-5-1', end='2020-5-9', freq='1D'))
-    holidays = holidays.append(pd.date_range(
-        start='2020-07-08', end='2020-08-02', freq='1D'))
-    holidays = holidays.append(pd.date_range(
-        start='2020-09-18', end='2020-09-27', freq='1D'))
-    holidays = holidays.append(pd.date_range(
-        start='2020-11-24', end='2020-12-31', freq='1D'))
-    # sprint(df['Date'])
-    # Add Holiday column to dataframe.
+    holidays = pd.date_range(start='2020-1-1', end='2020-3-14', freq = '1D')
+    holidays = holidays.append(pd.date_range(start='2020-5-1', end='2020-5-9', freq='1D'))
+    holidays = holidays.append(pd.date_range(start='2020-07-08', end='2020-08-02', freq='1D'))
+    holidays = holidays.append(pd.date_range(start='2020-09-18', end='2020-09-27', freq='1D'))
+    holidays = holidays.append(pd.date_range(start='2020-11-24', end='2020-12-31', freq='1D'))
+    holidays = holidays.strftime("%Y-%m-%d").tolist()
     df['Holiday'] = 0
-    df.loc[(df['Date']) == any(holidays.date),
-            'Holiday'] = 1  # Can't get this to work
 
+    for date in holidays:
+        df.loc[df['Date'] == date, 'Holiday'] = 1
     # Delete unused columns.
     del df['Date']
     del df['first-seen']
@@ -181,7 +177,7 @@ def viewDistributions(df):
     Visualises the distributions of the explanatory variables. 
     '''
     # Explore individual categories
-    groups = [1, 5, 6, 7, 8, 9]
+    groups = [1, 5, 6, 7, 8, 9, 12, 13]
     values = df.values
     i = 1
     # plot each column
@@ -199,7 +195,7 @@ def split(df):
     Splits the data into test and train, as well as the respective x and y sections of both subsets. 
     '''
     train, test = train_test_split(
-        df, test_size=0.2, random_state=42, shuffle=True)
+        df, test_size=0.2, shuffle=False)
     # Drop target variable from training data.
     x_train = train.drop(
         ['Datetimetemp', 'Bytes', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto'], axis=1).copy()
@@ -411,6 +407,8 @@ if __name__ == "__main__":
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
     
+    print(x_train)
+
     '''model = KerasClassifier(build_fn=create_simple, verbose=1)
 
 

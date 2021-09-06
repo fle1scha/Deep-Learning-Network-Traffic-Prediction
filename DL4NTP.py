@@ -25,6 +25,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import GridSearchCV
+from keras.wrappers.scikit_learn import KerasClassifier
+
+
 
 
 def readData(filename): 
@@ -48,7 +52,7 @@ def preprocess(data):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    for i in range(1, 8001):
+    for i in range(1, 32001):
         data_line = data[i].split()
 
         if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
@@ -349,6 +353,7 @@ def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
     plt.scatter(y_train/1000000, y_unscale(y_train, yhat_train)/1000000, alpha = 0.5, marker = '.', label='Training set')
     plt.scatter(y_test/1000000, y_unscale(y_train, yhat_test)/1000000, alpha = 0.5, marker = '.', label='Test set')
+    plt.plot([0, 600], [0,600])
     plt.xlabel('True Value')
     plt.ylabel('Predicted Value')
     plt.legend()
@@ -371,7 +376,25 @@ def y_unscale(y, yhat):
     Yscaler.fit(y)
     y_pred = Yscaler.inverse_transform(yhat)
     return y_pred
-        
+
+def create_simple(neurons = 1, batch_size = 1):
+    n_features = 9
+    model = Sequential()
+    # The 1 parameter here is the number of timesteps - essentially the lag. It is linked to the comment above.
+    model.add(LSTM(neurons, activation='sigmoid',
+                input_shape=(1, n_features)))
+    model.add(Dense(1))
+    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+    return model
+
+def gridSearch(model, param_grid, x, y):
+    x= x.reshape((x.shape[0], 1, x.shape[1]))
+
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1, cv = 3)
+    grid_result = grid.fit(x, y)
+    return grid_result
+
+
 if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
     df = preprocess(SANREN)
@@ -387,18 +410,17 @@ if __name__ == "__main__":
     y_train_scaled = scale(y_train)
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
-
-     #This has been commented out for now. It controls the epoch hyperparameter search. 
-    '''
-    for i in range(9):
-        history, loss_simple, yhat_train_simple, yhat_test_simple = simpleLSTM(x_train_scaled, y_train_scaled,
-                                x_test_scaled, y_test_scaled, 1, 10, 50)
-        plt.plot(history['train'], color='blue')
-        plt.plot(history['test'], color='orange')
-        print('%d) TrainRMSE=%f, TestRMSE=%f' %
-                (i, history['train'].iloc[-1], history['test'].iloc[-1]))
-    '''
     
+    '''model = KerasClassifier(build_fn=create_simple, verbose=1)
+
+
+    neurons = [5, 10, 50]
+    epochs = [10, 20]
+
+    param_grid = dict(epochs=epochs, neurons=neurons)
+    grid_result = gridSearch(model, param_grid, x_train_scaled, y_train_scaled)
+    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+    '''
     epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
     while (epochs < 0):
         try:
@@ -413,14 +435,6 @@ if __name__ == "__main__":
         except: 
             print("Please enter a number.\n")
      
-    '''
-    We must make sure we understand what the parameters do.
-    - Neurons: 
-    - Epochs:
-    - Timesteps: 
-    - Batchsize: 
-    '''
-    
     loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
     loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse = bidirectionalLSTM(

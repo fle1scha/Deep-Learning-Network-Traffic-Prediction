@@ -129,6 +129,8 @@ def format(df):
     df['Datetimetemp'] = df['Date'] + ' ' + \
         df['first-seen']  # Combine Date and first-seen
     df = df.astype({'Date': 'datetime64[ns]'})
+    df = df.astype({'first-seen': 'datetime64[ns]'})
+
     df["Day"] = df['Date'].dt.dayofweek  # Created Day variable.
     df = df.astype({'Date': str})
     #df = df.astype({'first-seen': np.datetime64})
@@ -166,7 +168,7 @@ def format(df):
         df.loc[df['Date'] == date, 'Holiday'] = 1
     # Delete unused columns.
     del df['Date']
-    del df['first-seen']
+    #del df['first-seen']
     return df
 
 def viewDistributions(df):
@@ -191,6 +193,7 @@ def split(df):
     '''
     Splits the data into test and train, as well as the respective x and y sections of both subsets. 
     '''
+    del df['first-seen']
     train, test = train_test_split(
         df, test_size=0.2, shuffle=False)
     # Drop target variable from training data.
@@ -372,6 +375,22 @@ def y_unscale(y, yhat):
     y_pred = Yscaler.inverse_transform(yhat)
     return y_pred
 
+def scatter3A(x, y, z):
+
+    plt.scatter(x, y, c = z, s = 100, cmap = 'gray')
+    plt.xlabel('Datetime')
+    plt.ylabel('Day of Week')
+    plt.title('Bytes as a function of Time and Day of Week')
+    plt.show()
+
+def scatter3B(x, y, z):
+
+    plt.scatter(x, y, c = z, s = 100, cmap = 'gray')
+    plt.xlabel('Datetime')
+    plt.ylabel('Holiday')
+    plt.title('Bytes as a function of Time and Holiday')
+    plt.show()
+
 def heatmap(data):
     corr = data.corr()
     sns.heatmap(corr, annot = True, cmap = 'CMRmap')
@@ -382,8 +401,14 @@ if __name__ == "__main__":
     df = preprocess(SANREN)
     df = format(df)
 
+    #Preprocessing
+    scatter3A(df['first-seen'], df['Day'], df['Bytes'])
+    scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
+
     heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
     heatmap(heatmap_df)
+
+    
     # view = input("View the distribution of the explanatory features? [Y/N]\n")
     # if (view == 'Y'):
     #     viewDistributions(df)

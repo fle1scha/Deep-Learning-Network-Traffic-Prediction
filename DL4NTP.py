@@ -204,16 +204,18 @@ def split(df):
     y_test = test[['Bytes']].copy()
     #print('X train shape', x_train.shape)
     # print(y_train.shape)
-    # view = input("View the split of training and test data? [Y/N]\n")
-    # if (view == 'Y'):
-    #     plt.figure(figsize=(40, 10))
-    #     plt.title(
-    #         "Split of Test and Train Set using Bytes as Target Variable")
-    #     plt.scatter(train['Datetime'], train['Bytes'],
-    #                 label='Training set')
-    #     plt.scatter(test['Datetime'], test['Bytes'], label='Test set')
-    #     plt.legend()
-    #     plt.show()
+    view = input("View the split of training and test data? [Y/N]\n")
+    if (view == 'Y'):
+        m, b = np.polyfit(df['Datetime'], df['Bytes'], 1)
+        plt.figure(figsize=(40, 10))
+        plt.title("Split of Test and Train Set using Bytes as Target Variable")
+        plt.scatter(train['Datetime'], train['Bytes'],label='Training set')
+        plt.scatter(test['Datetime'], test['Bytes'], label='Test set')
+        plt.ylabel("Bytes")
+        plt.xlabel("int64 Datetime")
+        plt.plot(df['Datetime'], m*df['Datetime']+b, color = 'red')
+        plt.legend()
+        plt.show()
 
     return x_train, y_train, x_test, y_test
 
@@ -372,7 +374,7 @@ def y_unscale(y, yhat):
 
 def heatmap(data):
     corr = data.corr()
-    sns.heatmap(corr, annot = True)
+    sns.heatmap(corr, annot = True, cmap = 'CMRmap')
     plt.show()
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import pandas as pd
 import datetime as dt
 import time
 import csv
-
+import seaborn as sns
 from datetime import datetime, date
 import keras.backend as K
 from tensorflow.keras.layers import Bidirectional
@@ -370,29 +370,18 @@ def y_unscale(y, yhat):
     y_pred = Yscaler.inverse_transform(yhat)
     return y_pred
 
-def create_simple(neurons = 1, batch_size = 1):
-    n_features = 9
-    model = Sequential()
-    # The 1 parameter here is the number of timesteps - essentially the lag. It is linked to the comment above.
-    model.add(LSTM(neurons, activation='sigmoid',
-                input_shape=(1, n_features)))
-    model.add(Dense(1))
-    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
-    return model
-
-def gridSearch(model, param_grid, x, y):
-    x= x.reshape((x.shape[0], 1, x.shape[1]))
-
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1, cv = 3)
-    grid_result = grid.fit(x, y)
-    return grid_result
-
+def heatmap(data):
+    corr = data.corr()
+    sns.heatmap(corr, annot = True)
+    plt.show()
 
 if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
     df = preprocess(SANREN)
     df = format(df)
 
+    heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
+    heatmap(heatmap_df)
     # view = input("View the distribution of the explanatory features? [Y/N]\n")
     # if (view == 'Y'):
     #     viewDistributions(df)
@@ -404,16 +393,6 @@ if __name__ == "__main__":
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
 
-    '''model = KerasClassifier(build_fn=create_simple, verbose=1)
-
-
-    neurons = [5, 10, 50]
-    epochs = [10, 20]
-
-    param_grid = dict(epochs=epochs, neurons=neurons)
-    grid_result = gridSearch(model, param_grid, x_train_scaled, y_train_scaled)
-    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-    '''
     # epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
     # while (epochs < 0):
     #     try:

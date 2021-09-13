@@ -195,7 +195,7 @@ def split(df):
     '''
     del df['first-seen']
     train, test = train_test_split(
-        df, test_size=0.2, shuffle=False)
+        df, test_size=0.2, shuffle=True)
     # Drop target variable from training data.
     x_train = train.drop(
         ['Datetimetemp', 'Bytes', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto'], axis=1).copy()
@@ -254,7 +254,8 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     print("Training Baseline LSTM...")
     tic = time.perf_counter() # Time at start of training
-    model.fit(X_train, y_train, epochs = epochs, verbose = 1)
+    model.fit(X_train, y_train, epochs = epochs, verbose = 1, validation_split = 0.2)
+    val_loss = model.history.history['val_loss']
     toc = time.perf_counter() # Time at end of training
     loss_per_epoch = model.history.history['loss']
     train_yhat = model.predict(X_train, verbose=0)
@@ -266,6 +267,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     simple_test_mae = mean_absolute_error(y_test, test_yhat)
     simple_train_mse = mean_squared_error(y_train, train_yhat)
     simple_test_mse = mean_squared_error(y_test, test_yhat)
+    
     
     simple_lstm_train_time = toc - tic
     simple_lstm_prediction_time = toc2 - tic2
@@ -288,7 +290,9 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
 
     print("Training Bidirectional LSTM...")
     tic = time.perf_counter()
-    model.fit(X_train, y_train, epochs=epochs, verbose=1)
+    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_split = 0.2)
+    val_loss = model.history.history['val_loss']
+
     toc = time.perf_counter()
 
     loss_per_epoch = model.history.history['loss']
@@ -326,7 +330,9 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     print("Training Stacked LSTM...")
     tic = time.perf_counter()
-    model.fit(X_train, y_train, epochs=epochs, verbose=1)
+    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_split = 0.2)
+    val_loss = model.history.history['val_loss']
+
     toc = time.perf_counter()
 
     loss_per_epoch = model.history.history['loss']
@@ -450,7 +456,7 @@ if __name__ == "__main__":
     #         print("Please enter a number.\n")
     neurons = 1
     epochs = 0
-    while epochs < 200:     
+    while epochs < 1:     
         epochs += 20
         loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
             x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons

@@ -408,7 +408,22 @@ if __name__ == "__main__":
     heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
     heatmap(heatmap_df)
 
-    
+    sns.kdeplot(df['Bytes'])
+    plt.title("Density of Byte Values")
+    plt.show()
+
+    q0 = min(df['Bytes'])
+    q1 = np.percentile(df['Bytes'], 25)
+    q2 = np.percentile(df['Bytes'], 50)
+    q3 = np.percentile(df['Bytes'], 75)
+    q4 = max(df['Bytes'])
+
+    print('Min: %.2f' % q0)
+    print('Q1: %.2f' % q1)
+    print('Median: %.2f' % q2)
+    print('Q3: %.2f' % q3)
+    print('Max: %.2f' % q4)
+
     # view = input("View the distribution of the explanatory features? [Y/N]\n")
     # if (view == 'Y'):
     #     viewDistributions(df)

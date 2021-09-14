@@ -23,7 +23,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 from random import random
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import GridSearchCV
 from keras.wrappers.scikit_learn import KerasClassifier
@@ -271,8 +271,10 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     
     simple_lstm_train_time = toc - tic
     simple_lstm_prediction_time = toc2 - tic2
+    
+    simple_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
@@ -308,8 +310,10 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     bidirectional_test_mae = mean_absolute_error(y_test, test_yhat)
     bidirectional_train_mse = mean_squared_error(y_train, train_yhat)
     bidirectional_test_mse = mean_squared_error(y_test, test_yhat)
+    
+    bidirectional_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
@@ -348,8 +352,10 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     stacked_test_mae = mean_absolute_error(y_test, test_yhat)
     stacked_train_mse = mean_squared_error(y_train, train_yhat)
     stacked_test_mse = mean_squared_error(y_test, test_yhat)
+    
+    stacked_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse
+    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
@@ -455,17 +461,21 @@ if __name__ == "__main__":
         except: 
             print("Please enter a number.\n")
             
-    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
+    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2 = simpleLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
-    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse = bidirectionalLSTM(
+    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2 = bidirectionalLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse = stackedLSTM(
+    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2 = stackedLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
     data = [32000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
-            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse]
+            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse, simple_r2, bidirectional_r2, stacked_r2]
     with open('data.csv', 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(data)        
+        writer.writerow(data)    
+        
+    print(simple_r2)
+    print(bidirectional_r2)
+    print(stacked_r2)
 
     # view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     # if (view == 'Y'):

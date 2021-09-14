@@ -32,7 +32,6 @@ def readData(filename):
     print('Reading dataset...')
     with open(filename) as f:
         SANReN = f.readlines()
-    print (SANReN)
     return SANReN 
 
 def loadData(filename1, filename2):
@@ -57,14 +56,12 @@ def preprocess(data, inputs):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    print(len(data))
     for i in range(1, inputs):
         data_line = data[i].split()
         #print(data_line)
         #print(i)
 
         if (data_line[0] == 'Summary:') or (data_line[0] == 'Time') or (data_line[0] == 'Total') or (data_line[0] == 'Date') or (data_line[0] == 'Sys:') or (len(data_line)<15):
-            print(data_line)
             pass
             
         else:
@@ -257,8 +254,11 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     then affects how we will reshape the X_train into the correct 3D format for the model. @Ant currently working on ot. 
     '''
     # We need to figure out how to reshape effectively. This is linked to the comment below. If the middle parameter here is 1 then batch_size is 1.
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size = 0.2)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
+    X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
+    Y_valid = y_valid.reshape((y_valid.shape[0], 1, y_valid.shape[1]))
 
     n_features = X_train.shape[2]
     model = Sequential()
@@ -270,7 +270,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     print("Training Baseline LSTM...")
     tic = time.perf_counter() # Time at start of training
-    model.fit(X_train, y_train, epochs = epochs, verbose = 1, validation_split = 0.2)
+    model.fit(X_train, y_train, epochs = epochs, verbose = 1, validation_data = (X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
     toc = time.perf_counter() # Time at end of training
     loss_per_epoch = model.history.history['loss']
@@ -279,26 +279,32 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     test_yhat = model.predict(X_test, verbose=0)
     toc2 = time.perf_counter()
     
+    val_yhat = model.predict(X_valid, verbose=0)
+
     simple_train_mae = mean_absolute_error(y_train, train_yhat)
     simple_test_mae = mean_absolute_error(y_test, test_yhat)
+    simple_val_mae = mean_absolute_error(y_valid, val_yhat)
     simple_train_mse = mean_squared_error(y_train, train_yhat)
     simple_test_mse = mean_squared_error(y_test, test_yhat)
-    
+    simple_val_mse = mean_squared_error(y_valid, val_yhat)
     
     simple_lstm_train_time = toc - tic
     simple_lstm_prediction_time = toc2 - tic2
     
     simple_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
     Builds and trains a bidirectional LSTM. 
     '''
+
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size = 0.2)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
-
+    X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
+    Y_valid = y_valid.reshape((y_valid.shape[0], 1, y_valid.shape[1]))
     n_features = X_train.shape[2]
     model = Sequential()
     model.add(Bidirectional(LSTM(neurons, return_sequences=False,
@@ -308,7 +314,7 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
 
     print("Training Bidirectional LSTM...")
     tic = time.perf_counter()
-    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_split = 0.2)
+    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_data = (X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()
@@ -319,25 +325,32 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     test_yhat = model.predict(X_test, verbose=0)
     toc2 = time.perf_counter()
     
+    val_yhat = model.predict(X_valid, verbose=0)
+
     bidirectional_lstm_train_time = toc - tic
     bidirectional_lstm_prediction_time = toc2 - tic2
     
     bidirectional_train_mae = mean_absolute_error(y_train, train_yhat)
     bidirectional_test_mae = mean_absolute_error(y_test, test_yhat)
+    bidirectional_val_mae = mean_absolute_error(y_valid, val_yhat)
     bidirectional_train_mse = mean_squared_error(y_train, train_yhat)
     bidirectional_test_mse = mean_squared_error(y_test, test_yhat)
+    bidirectional_val_mse = mean_squared_error(y_valid, val_yhat)
     
     bidirectional_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
     Builds and trains a stacked LSTM. We could break this down into a method that creates the model and then a method that does
     the prediction. @Justin
     '''
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size = 0.2)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
+    X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
+    Y_valid = y_valid.reshape((y_valid.shape[0], 1, y_valid.shape[1]))
 
     n_features = X_train.shape[2]
     model = Sequential()
@@ -350,28 +363,35 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
 
     print("Training Stacked LSTM...")
     tic = time.perf_counter()
-    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_split = 0.2)
+    model.fit(X_train, y_train, epochs=epochs, verbose=1, validation_data = (X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()
-
     loss_per_epoch = model.history.history['loss']
+
     train_yhat = model.predict(X_train, verbose=0)
+
+
     tic2 = time.perf_counter()
     test_yhat = model.predict(X_test, verbose=0)
     toc2 = time.perf_counter()
+
+    val_yhat = model.predict(X_valid, verbose=0)
     
     stacked_lstm_training_time = toc - tic
     stacked_lstm_prediction_time = toc2 - tic2
     
     stacked_train_mae = mean_absolute_error(y_train, train_yhat)
     stacked_test_mae = mean_absolute_error(y_test, test_yhat)
+    stacked_val_mae = mean_absolute_error(y_valid, val_yhat)
     stacked_train_mse = mean_squared_error(y_train, train_yhat)
     stacked_test_mse = mean_squared_error(y_test, test_yhat)
+    stacked_val_mse = mean_squared_error(y_valid, val_yhat)
+    
     
     stacked_r2 = r2_score(y_test, test_yhat)
 
-    return loss_per_epoch, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
     '''
@@ -408,6 +428,8 @@ def scatter3A(x, y, z):
     plt.scatter(x, y, c = z, s = 100, cmap = 'gray')
     plt.xlabel('Datetime')
     plt.ylabel('Day of Week')
+    plt.yticks(np.arange(0.0, 6.0, step=1))  # Set label locations.
+    plt.yticks(np.arange(7), ['Mon', 'Tue', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'])  # Set text labels.
     plt.title('Bytes as a function of Time and Day of Week')
     plt.show()
 
@@ -416,6 +438,8 @@ def scatter3B(x, y, z):
     plt.scatter(x, y, c = z, s = 100, cmap = 'gray')
     plt.xlabel('Datetime')
     plt.ylabel('Holiday')
+    plt.yticks(np.arange(0.0, 1.0, step=1))  # Set label locations.
+    plt.yticks(np.arange(2), ['Not holiday', 'holiday'])  # Set text labels.
     plt.title('Bytes as a function of Time and Holiday')
     plt.show()
 
@@ -426,24 +450,21 @@ def heatmap(data):
 
 if __name__ == "__main__":
 
-    loadData('SANREN_large.txt', 'SANREN2.txt')
-    SANREN = readData('SANREN.txt')
-    df = preprocess(SANREN, len(SANREN))
+    #loadData('SANREN_large.txt', 'SANREN2.txt')
+    SANREN = readData('SANREN_large.txt')
+    df = preprocess(SANREN, 20000)
     df = format(df)
 
-
-
-
     #Preprocessing
-    scatter3A(df['first-seen'], df['Day'], df['Bytes'])
-    scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
+    #scatter3A(df['first-seen'], df['Day'], df['Bytes'])
+    #scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
 
-    heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
-    heatmap(heatmap_df)
+    #heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
+    #heatmap(heatmap_df)
 
-    sns.kdeplot(df['Bytes'])
-    plt.title("Density of Byte Values")
-    plt.show()
+    #sns.kdeplot(df['Bytes'])
+    #plt.title("Density of Byte Values")
+    #plt.show()
 
     q0 = min(df['Bytes'])
     q1 = np.percentile(df['Bytes'], 25)
@@ -482,11 +503,11 @@ if __name__ == "__main__":
         except: 
             print("Please enter a number.\n")
             
-    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2 = simpleLSTM(
+    loss_simple, val_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse, simple_r2 = simpleLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
-    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2 = bidirectionalLSTM(
+    loss_bidirectional, val_bi, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_r2 = bidirectionalLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2 = stackedLSTM(
+    loss_stacked, val_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse, stacked_r2 = stackedLSTM(
         x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
     data = [32000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
             stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse, simple_r2, bidirectional_r2, stacked_r2]

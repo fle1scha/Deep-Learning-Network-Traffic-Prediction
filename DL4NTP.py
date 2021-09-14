@@ -32,9 +32,17 @@ def readData(filename):
     print('Reading dataset...')
     with open(filename) as f:
         SANReN = f.readlines()
-    return SANReN   
+    print (SANReN)
+    return SANReN 
 
-def preprocess(data):
+def loadData(filename1, filename2):
+    filenames = [filename1, filename2]
+    with open('SANREN.txt', 'w') as outfile:
+        for fname in filenames:
+            with open(fname) as infile:
+                outfile.write(infile.read(30000)+"\n")  
+
+def preprocess(data, inputs):
     '''
     Preprocesses the data.
     '''
@@ -49,75 +57,83 @@ def preprocess(data):
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
-    for i in range(1, 32001):
+    print(len(data))
+    for i in range(1, inputs):
         data_line = data[i].split()
+        #print(data_line)
+        #print(i)
 
-        if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
-            if (data_line[11] == 'G'):
-                data_line[10] = float(data_line[10])*100000000
-            else:
-                data_line[10] = float(data_line[10])*1000000
-            if (data_line[13] == 'G'):
-                data_line[12] = float(data_line[12])*100000000
-            else:
-                data_line[12] = float(data_line[12])*1000000
-            if (data_line[15] == 'G'):
-                data_line[14] = float(data_line[14])*100000000
-            else:
-                data_line[14] = float(data_line[14])*1000000
+        if (data_line[0] == 'Summary:') or (data_line[0] == 'Time') or (data_line[0] == 'Total') or (data_line[0] == 'Date') or (data_line[0] == 'Sys:') or (len(data_line)<15):
+            print(data_line)
+            pass
+            
+        else:
+            if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
+                if (data_line[11] == 'G'):
+                    data_line[10] = float(data_line[10])*100000000
+                else:
+                    data_line[10] = float(data_line[10])*1000000
+                if (data_line[13] == 'G'):
+                    data_line[12] = float(data_line[12])*100000000
+                else:
+                    data_line[12] = float(data_line[12])*1000000
+                if (data_line[15] == 'G'):
+                    data_line[14] = float(data_line[14])*100000000
+                else:
+                    data_line[14] = float(data_line[14])*1000000
 
-            data_line = data_line[0:5] + data_line[6:7] + data_line[9:11] + \
-                data_line[12:13] + data_line[14:15] + data_line[16:17]
+                data_line = data_line[0:5] + data_line[6:7] + data_line[9:11] + \
+                    data_line[12:13] + data_line[14:15] + data_line[16:17]
 
-        # Bytes and BPS in megabytes\n"
-        elif ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[14] == 'M' or data_line[14] == 'G')):
-            if (data_line[11] == 'G'):
-                data_line[10] = float(data_line[10])*100000000
-            else:
-                data_line[10] = float(data_line[10])*1000000
-            if (data_line[14] == 'G'):
-                data_line[13] = float(data_line[13])*100000000
-            else:
-                data_line[13] = float(data_line[13])*1000000
+            # Bytes and BPS in megabytes\n"
+            elif ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[14] == 'M' or data_line[14] == 'G')):
+                if (data_line[11] == 'G'):
+                    data_line[10] = float(data_line[10])*100000000
+                else:
+                    data_line[10] = float(data_line[10])*1000000
+                if (data_line[14] == 'G'):
+                    data_line[13] = float(data_line[13])*100000000
+                else:
+                    data_line[13] = float(data_line[13])*1000000
 
-            data_line = data_line[0:5] + data_line[6:7] + \
-                data_line[9:11] + data_line[12:14] + data_line[15:16]
+                data_line = data_line[0:5] + data_line[6:7] + \
+                    data_line[9:11] + data_line[12:14] + data_line[15:16]
 
-        # Bytes and BPS in megabytes\n"
-        elif ((data_line[12] == "M" or data_line[12] == 'G') and (data_line[12] == 'M' or data_line[12] == 'G')):
-            if (data_line[12] == 'G'):
-                data_line[11] = float(data_line[11])*100000000
-            else:
-                data_line[11] = float(data_line[11])*1000000
-            if (data_line[14] == 'G'):
-                data_line[13] = float(data_line[13])*100000000
-            else:
-                data_line[13] = float(data_line[13])*1000000
+            # Bytes and BPS in megabytes\n"
+            elif ((data_line[12] == "M" or data_line[12] == 'G') and (data_line[12] == 'M' or data_line[12] == 'G')):
+                if (data_line[12] == 'G'):
+                    data_line[11] = float(data_line[11])*100000000
+                else:
+                    data_line[11] = float(data_line[11])*1000000
+                if (data_line[14] == 'G'):
+                    data_line[13] = float(data_line[13])*100000000
+                else:
+                    data_line[13] = float(data_line[13])*1000000
 
-            data_line = data_line[0:5] + data_line[6:7] + \
-                data_line[9:12] + data_line[13:14] + data_line[15:16]
+                data_line = data_line[0:5] + data_line[6:7] + \
+                    data_line[9:12] + data_line[13:14] + data_line[15:16]
 
-        elif (data_line[13] == 'M' or data_line[13] == 'G'):  # BPS measured in megabytes
-            if (data_line[13] == 'G'):
-                data_line[12] = float(data_line[12])*100000000
-            else:
-                data_line[12] = float(data_line[12])*1000000
+            elif (data_line[13] == 'M' or data_line[13] == 'G'):  # BPS measured in megabytes
+                if (data_line[13] == 'G'):
+                    data_line[12] = float(data_line[12])*100000000
+                else:
+                    data_line[12] = float(data_line[12])*1000000
 
-            data_line = data_line[0:5] + data_line[6:7] + \
-                data_line[9:13] + data_line[14:15]
+                data_line = data_line[0:5] + data_line[6:7] + \
+                    data_line[9:13] + data_line[14:15]
 
-        elif data_line[11] == 'M':  # Bytes measured in megabytes
-            data_line = data_line[0:5] + data_line[6:7] + \
-                data_line[9:11] + data_line[12:15]
-            # Change M bytes into byte measurement.
-            data_line[7] = float(data_line[7])*1000000
+            elif data_line[11] == 'M':  # Bytes measured in megabytes
+                data_line = data_line[0:5] + data_line[6:7] + \
+                    data_line[9:11] + data_line[12:15]
+                # Change M bytes into byte measurement.
+                data_line[7] = float(data_line[7])*1000000
 
-        else:  # No megabyte metrics
-            data_line = data_line[0:5] + data_line[6:7] + data_line[9:14]
+            else:  # No megabyte metrics
+                data_line = data_line[0:5] + data_line[6:7] + data_line[9:14]
 
-        framedata.append(data_line)  # append each line to 'mother' array.
+            framedata.append(data_line)  # append each line to 'mother' array.
     # Convert Numpy array into Pandas dataframe.
-    df = pd.DataFrame(np.array(framedata), columns=headings_line)
+    df = pd.DataFrame(np.array(framedata), columns=headings_line).copy()
     print('Data converted to Pandas dataframe.')
     return df
 
@@ -137,7 +153,7 @@ def format(df):
     df = df.astype({'Duration': np.float64})
     df = df.astype({"SrcIPAddr:Port": str})
     df = df.astype({"DstIPAddr:Port": str})
-    df = df.astype({"Packets": np.int64})
+    df = df.astype({"Packets": np.float64})
     df = df.astype({"Bytes": np.float64})
     df = df.astype({"pps": np.float64})
     df = df.astype({"bps": np.float64})
@@ -409,9 +425,14 @@ def heatmap(data):
     plt.show()
 
 if __name__ == "__main__":
-    SANREN = readData('SANREN_large.txt')
-    df = preprocess(SANREN)
+
+    loadData('SANREN_large.txt', 'SANREN2.txt')
+    SANREN = readData('SANREN.txt')
+    df = preprocess(SANREN, len(SANREN))
     df = format(df)
+
+
+
 
     #Preprocessing
     scatter3A(df['first-seen'], df['Day'], df['Bytes'])

@@ -24,9 +24,8 @@ subject to network constraints? - Stacked highest, Bidirectional lowest
 4. Understanding LSTMS https://colah.github.io/posts/2015-08-Understanding-LSTMs/
 5. Performance Metrics in Machine Learning [Complete Guide] https://neptune.ai/blog/performance-metrics-in-machine-learning-complete-guide
 
-## Josiah suggestions
-1. Field for internal or external IP addresses. Geolococation method. 
-2. Will doubling the number of data points double the training time? Grid search over data points and training times and report.
-3. Dataset size vs accuracy 
-4. Training time vs accuracy
-5. In a given time period, how many flows are there? Total bytes per period might also be useful. 
+## Final Paper to-do's
+1. Try a new dataset
+2. Change loss to validation loss
+3. Change percentage of validation loss
+4. Table of metrics

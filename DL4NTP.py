@@ -441,34 +441,31 @@ if __name__ == "__main__":
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
 
-    # epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
-    # while (epochs < 0):
-    #     try:
-    #         epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
-    #     except: 
-    #         print("Please enter a number.\n")
+    epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
+    while (epochs < 0):
+        try:
+            epochs = int(input("How many epochs would you like to train the models on? [n >= 1]\n"))
+        except: 
+            print("Please enter a number.\n")
     
-    # neurons  = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
-    # while (neurons < 0):
-    #     try:
-    #         neurons = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
-    #     except: 
-    #         print("Please enter a number.\n")
-    neurons = 1
-    epochs = 0
-    while epochs < 1:     
-        epochs += 20
-        loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
-            x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
-        loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse = bidirectionalLSTM(
-            x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-        loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse = stackedLSTM(
-            x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
-        data = [32000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
-                stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse]
-        with open('data.csv', 'a', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(data)        
+    neurons  = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+    while (neurons < 0):
+        try:
+            neurons = int(input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+        except: 
+            print("Please enter a number.\n")
+            
+    loss_simple, yhat_train_simple, yhat_test_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_train_mse, simple_test_mse = simpleLSTM(
+        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
+    loss_bidirectional, yhat_train_bi, yhat_test_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_train_mse, bidirectional_test_mse = bidirectionalLSTM(
+        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    loss_stacked, yhat_train_stacked, yhat_test_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_train_mse, stacked_test_mse = stackedLSTM(
+        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+    data = [32000, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
+            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, bidirectional_train_mae, bidirectional_test_mae, stacked_train_mae, stacked_test_mae, simple_train_mse, simple_test_mse, bidirectional_train_mse, bidirectional_test_mse, stacked_train_mse, stacked_test_mse]
+    with open('data.csv', 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)        
 
     # view = input("View the predicted yhat values for the test and training sets? [Y/N]\n")
     # if (view == 'Y'):

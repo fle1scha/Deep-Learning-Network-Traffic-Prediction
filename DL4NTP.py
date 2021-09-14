@@ -218,7 +218,7 @@ def split(df):
     '''
     del df['first-seen']
     train, test = train_test_split(
-        df, test_size=0.2, shuffle=True)
+        df, test_size=0.2, shuffle=True, random_state = 42)
     # Drop target variable from training data.
     x_train = train.drop(
         ['Datetimetemp', 'Bytes', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto'], axis=1).copy()
@@ -267,7 +267,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
     # We need to figure out how to reshape effectively. This is linked to the comment below. If the middle parameter here is 1 then batch_size is 1.
     x_train, x_valid, y_train, y_valid = train_test_split(
-        x_train, y_train, test_size=0.2, shuffle = False)
+        x_train, y_train, test_size=0.2, shuffle = True, random_state = 42)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
     X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
@@ -284,7 +284,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print("Training Baseline LSTM...")
     tic = time.perf_counter()  # Time at start of training
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid))
+              validation_data=(X_valid, Y_valid), shuffle = True)
     val_loss = model.history.history['val_loss']
     toc = time.perf_counter()  # Time at end of training
     loss_per_epoch = model.history.history['loss']
@@ -318,7 +318,7 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     '''
 
     x_train, x_valid, y_train, y_valid = train_test_split(
-        x_train, y_train, test_size=0.2, shuffle = False)
+        x_train, y_train, test_size=0.2, random_state = 42, shuffle = True)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
     X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
@@ -333,7 +333,7 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     print("Training Bidirectional LSTM...")
     tic = time.perf_counter()
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid))
+              validation_data=(X_valid, Y_valid), shuffle = True)
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()
@@ -369,7 +369,7 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     the prediction. @Justin
     '''
     x_train, x_valid, y_train, y_valid = train_test_split(
-        x_train, y_train, test_size=0.2, shuffle = False)
+        x_train, y_train, test_size=0.2, random_state = 42, shuffle = True)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
     X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
@@ -387,7 +387,7 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print("Training Stacked LSTM...")
     tic = time.perf_counter()
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid))
+              validation_data=(X_valid, Y_valid), shuffle = True)
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()

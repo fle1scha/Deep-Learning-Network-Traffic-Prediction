@@ -308,8 +308,8 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print('Validation R2: ', r2_score(y_valid, val_yhat))
     print('Test R2: ', r2_score(y_test, test_yhat))
     simple_r2 = r2_score(y_test, test_yhat)
-
-    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, simple_r2
+    simple_val_r2 = r2_score(y_valid, val_yhat)
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, simple_lstm_train_time, simple_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, simple_r2, simple_val_r2
 
 
 def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
@@ -359,8 +359,9 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     print('Validation R2: ', r2_score(y_valid, val_yhat))
     print('Test R2: ', r2_score(y_test, test_yhat))
     bidirectional_r2 = r2_score(y_test, test_yhat)
+    bidirectional_val_r2 = r2_score(y_valid, val_yhat)
 
-    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, bidirectional_r2
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, bidirectional_r2, bidirectional_val_r2
 
 
 def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
@@ -414,8 +415,9 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print('Validation R2: ', r2_score(y_valid, val_yhat))
     print('Test R2: ', r2_score(y_test, test_yhat))
     stacked_r2 = r2_score(y_test, test_yhat)
+    stacked_val_r2 = r2_score(y_valid, val_yhat)
 
-    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_val_mae, stacked_train_mse, stacked_test_mse, stacked_val_mse, stacked_r2
+    return loss_per_epoch, val_loss, train_yhat, test_yhat, val_yhat, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_val_mae, stacked_train_mse, stacked_test_mse, stacked_val_mse, stacked_r2, stacked_val_r2
 
 
 def view_yhat(y_train, yhat_train, y_test, yhat_test, name):
@@ -490,81 +492,83 @@ if __name__ == "__main__":
     SANREN = readData('SANREN_large.txt')
 
     sizes = [8000, 16000, 24000, 32000]
-    for size in sizes:
-        df = preprocess(SANREN, size)
-        df = format(df)
+    epochs_list = [25, 50, 75, 100, 125, 150]
+    neuron_list = [50, 100]
 
-        #Preprocessing
-        #scatter3A(df['first-seen'], df['Day'], df['Bytes'])
-        #scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
-
-        #heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
-        #heatmap(heatmap_df)
-
-        #sns.kdeplot(df['Bytes'])
-        #plt.title("Density of Byte Values")
-        #plt.show()
-
-        q0 = min(df['Bytes'])
-        q1 = np.percentile(df['Bytes'], 25)
-        q2 = np.percentile(df['Bytes'], 50)
-        q3 = np.percentile(df['Bytes'], 75)
-        q4 = max(df['Bytes'])
-
-        print('Min: %.2f' % q0)
-        print('Q1: %.2f' % q1)
-        print('Median: %.2f' % q2)
-        print('Q3: %.2f' % q3)
-        print('Max: %.2f' % q4)
-
-        # view = input("View the distribution of the explanatory features? [Y/N]\n")
-        # if (view == 'Y'):
-        #     viewDistributions(df)
-
-        x_train, y_train, x_test, y_test = split(df)
-
-        x_train_scaled = scale(x_train)
-        y_train_scaled = scale(y_train)
-        x_test_scaled = scale(x_test)
-        y_test_scaled = scale(y_test)
-
-        '''
-        epochs = int(
-            input("How many epochs would you like to train the models on? [n >= 1]\n"))
-        while (epochs < 0):
-            try:
-                epochs = int(
-                    input("How many epochs would you like to train the models on? [n >= 1]\n"))
-            except:
-                print("Please enter a number.\n")
-
-        neurons = int(
-            input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
-        while (neurons < 0):
-            try:
-                neurons = int(
-                    input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
-            except:
-                print("Please enter a number.\n")
-        '''
-        epochs_list = [25, 50, 75, 100, 125, 150]
-        neuron_list = [50, 100]
-
-        for epochs in epochs_list:
-            for neurons in neuron_list:
+    for epochs in epochs_list:
+        for neurons in neuron_list:
+            for size in sizes:
                 for j in range(5):
+
+                    df = preprocess(SANREN, size)
+                    df = format(df)
+
+                    #Preprocessing
+                    #scatter3A(df['first-seen'], df['Day'], df['Bytes'])
+                    #scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
+
+                    #heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
+                    #heatmap(heatmap_df)
+
+                    #sns.kdeplot(df['Bytes'])
+                    #plt.title("Density of Byte Values")
+                    #plt.show()
+
+                    q0 = min(df['Bytes'])
+                    q1 = np.percentile(df['Bytes'], 25)
+                    q2 = np.percentile(df['Bytes'], 50)
+                    q3 = np.percentile(df['Bytes'], 75)
+                    q4 = max(df['Bytes'])
+
+                    print('Min: %.2f' % q0)
+                    print('Q1: %.2f' % q1)
+                    print('Median: %.2f' % q2)
+                    print('Q3: %.2f' % q3)
+                    print('Max: %.2f' % q4)
+
+                    # view = input("View the distribution of the explanatory features? [Y/N]\n")
+                    # if (view == 'Y'):
+                    #     viewDistributions(df)
+
+                    x_train, y_train, x_test, y_test = split(df)
+
+                    x_train_scaled = scale(x_train)
+                    y_train_scaled = scale(y_train)
+                    x_test_scaled = scale(x_test)
+                    y_test_scaled = scale(y_test)
+
+                    '''
+                    epochs = int(
+                        input("How many epochs would you like to train the models on? [n >= 1]\n"))
+                    while (epochs < 0):
+                        try:
+                            epochs = int(
+                                input("How many epochs would you like to train the models on? [n >= 1]\n"))
+                        except:
+                            print("Please enter a number.\n")
+
+                    neurons = int(
+                        input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+                    while (neurons < 0):
+                        try:
+                            neurons = int(
+                                input("How many neurons would you like each LSTM layer to have? [n >= 1]\n"))
+                        except:
+                            print("Please enter a number.\n")
+                    '''
+                    
                     print("Now testing: ", epochs, neurons, j, size)
-                    loss_simple, val_simple, yhat_train_simple, yhat_test_simple, yhat_val_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, simple_r2 = simpleLSTM(
-                        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
+                    loss_simple, val_simple, yhat_train_simple, yhat_test_simple, yhat_val_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, simple_r2, simple_val_r2 = simpleLSTM(
+                                    x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)  # timesteps (lag), epochs, neurons
 
-                    loss_bidirectional, val_bi, yhat_train_bi, yhat_test_bi, yhat_val_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, bidirectional_r2 = bidirectionalLSTM(
-                        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+                    loss_bidirectional, val_bi, yhat_train_bi, yhat_test_bi, yhat_val_bi, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, bidirectional_r2, bidirectional_val_r2 = bidirectionalLSTM(
+                                    x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
 
-                    loss_stacked, val_stacked, yhat_train_stacked, yhat_test_stacked, yhat_val_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_val_mae, stacked_train_mse, stacked_test_mse, stacked_val_mse, stacked_r2 = stackedLSTM(
-                        x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
+                    loss_stacked, val_stacked, yhat_train_stacked, yhat_test_stacked, yhat_val_stacked, stacked_lstm_training_time, stacked_lstm_prediction_time, stacked_train_mae, stacked_test_mae, stacked_val_mae, stacked_train_mse, stacked_test_mse, stacked_val_mse, stacked_r2, stacked_val_r2 = stackedLSTM(
+                                    x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled, 1, epochs, neurons)
 
                     data = [size, epochs, neurons, simple_lstm_train_time, simple_lstm_prediction_time, bidirectional_lstm_train_time, bidirectional_lstm_prediction_time,
-                            stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_val_mae, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, stacked_train_mae, stacked_test_mae, stacked_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, stacked_train_mse, stacked_test_mse, stacked_val_mse, simple_r2, bidirectional_r2, stacked_r2]
+                                        stacked_lstm_training_time, stacked_lstm_prediction_time, simple_train_mae, simple_test_mae, simple_val_mae, bidirectional_train_mae, bidirectional_test_mae, bidirectional_val_mae, stacked_train_mae, stacked_test_mae, stacked_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, bidirectional_train_mse, bidirectional_test_mse, bidirectional_val_mse, stacked_train_mse, stacked_test_mse, stacked_val_mse, simple_r2, bidirectional_r2, stacked_r2, simple_val_r2, bidirectional_val_r2, stacked_val_r2]
                     with open('data.csv', 'a', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(data)

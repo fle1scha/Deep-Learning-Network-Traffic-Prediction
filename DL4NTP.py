@@ -36,12 +36,12 @@ def readData(filename):
     return SANReN
 
 
-def loadData(filename1, filename2):
-    filenames = [filename1, filename2]
+def loadData(filenames):
+    
     with open('SANREN.txt', 'w') as outfile:
         for fname in filenames:
             with open(fname) as infile:
-                outfile.write(infile.read(30000)+"\n")
+                outfile.write(infile.read(1000000)+"\n")
 
 
 def preprocess(data, inputs):
@@ -55,7 +55,7 @@ def preprocess(data, inputs):
     headings_line[5:8] = [''.join(headings_line[5:8])]
     # Remove 'Flags', 'Tos', and 'Flows'.
     headings_line = headings_line[0:6] + headings_line[8:13]
-
+    
     # Clean time-series data points.
     framedata = []
     print('Preprocessing data...')
@@ -68,7 +68,9 @@ def preprocess(data, inputs):
             pass
 
         else:
-            if ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
+            if (data_line[10] == 'M'):
+                pass
+            elif ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[13] == 'M' or data_line[13] == 'G') and (data_line[15] == 'M' or data_line[15] == 'G')):
                 if (data_line[11] == 'G'):
                     data_line[10] = float(data_line[10])*100000000
                 else:
@@ -84,7 +86,7 @@ def preprocess(data, inputs):
 
                 data_line = data_line[0:5] + data_line[6:7] + data_line[9:11] + \
                     data_line[12:13] + data_line[14:15] + data_line[16:17]
-
+                framedata.append(data_line)
             # Bytes and BPS in megabytes\n"
             elif ((data_line[11] == "M" or data_line[11] == 'G') and (data_line[14] == 'M' or data_line[14] == 'G')):
                 if (data_line[11] == 'G'):
@@ -98,7 +100,7 @@ def preprocess(data, inputs):
 
                 data_line = data_line[0:5] + data_line[6:7] + \
                     data_line[9:11] + data_line[12:14] + data_line[15:16]
-
+                framedata.append(data_line)
             # Bytes and BPS in megabytes\n"
             elif ((data_line[12] == "M" or data_line[12] == 'G') and (data_line[12] == 'M' or data_line[12] == 'G')):
                 if (data_line[12] == 'G'):
@@ -112,7 +114,7 @@ def preprocess(data, inputs):
 
                 data_line = data_line[0:5] + data_line[6:7] + \
                     data_line[9:12] + data_line[13:14] + data_line[15:16]
-
+                framedata.append(data_line)
             elif (data_line[13] == 'M' or data_line[13] == 'G'):  # BPS measured in megabytes
                 if (data_line[13] == 'G'):
                     data_line[12] = float(data_line[12])*100000000
@@ -121,17 +123,20 @@ def preprocess(data, inputs):
 
                 data_line = data_line[0:5] + data_line[6:7] + \
                     data_line[9:13] + data_line[14:15]
+                framedata.append(data_line)
 
             elif data_line[11] == 'M':  # Bytes measured in megabytes
                 data_line = data_line[0:5] + data_line[6:7] + \
                     data_line[9:11] + data_line[12:15]
                 # Change M bytes into byte measurement.
                 data_line[7] = float(data_line[7])*1000000
+                framedata.append(data_line)
 
             else:  # No megabyte metrics
                 data_line = data_line[0:5] + data_line[6:7] + data_line[9:14]
+                framedata.append(data_line)
 
-            framedata.append(data_line)  # append each line to 'mother' array.
+              # append each line to 'mother' array.
     # Convert Numpy array into Pandas dataframe.
     df = pd.DataFrame(np.array(framedata), columns=headings_line).copy()
     print('Data converted to Pandas dataframe.')
@@ -218,7 +223,7 @@ def split(df):
     '''
     del df['first-seen']
     train, test = train_test_split(
-        df, test_size=0.2, random_state = 13)
+        df, test_size=0.2, random_state = 13, shuffle = False)
     # Drop target variable from training data.
     x_train = train.drop(
         ['Datetimetemp', 'Bytes', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto'], axis=1).copy()
@@ -230,18 +235,18 @@ def split(df):
     y_test = test[['Bytes']].copy()
     #print('X train shape', x_train.shape)
     # print(y_train.shape)
-    #view = input("View the split of training and test data? [Y/N]\n")
-    #if (view == 'Y'):
-      #  m, b = np.polyfit(df['Datetime'], df['Bytes'], 1)
-       # plt.figure(figsize=(40, 10))
-        #plt.title("Split of Test and Train Set using Bytes as Target Variable")
-        #plt.scatter(train['Datetime'], train['Bytes'], label='Training set')
-        #plt.scatter(test['Datetime'], test['Bytes'], label='Test set')
-        #plt.ylabel("Bytes")
-        #plt.xlabel("int64 Datetime")
+    view = input("View the split of training and test data? [Y/N]\n")
+    if (view == 'Y'):
+        m, b = np.polyfit(df['Datetime'], df['Bytes'], 1)
+        plt.figure(figsize=(40, 10))
+        plt.title("Split of Test and Train Set using Bytes as Target Variable")
+        plt.scatter(train['Datetime'], train['Bytes'], label='Training set')
+        plt.scatter(test['Datetime'], test['Bytes'], label='Test set')
+        plt.ylabel("Bytes")
+        plt.xlabel("int64 Datetime")
         #plt.plot(df['Datetime'], m*df['Datetime']+b, color='red')
-        #plt.legend()
-        #plt.show()
+        plt.legend()
+        plt.show()
 
     return x_train, y_train, x_test, y_test
 
@@ -267,7 +272,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     '''
     # We need to figure out how to reshape effectively. This is linked to the comment below. If the middle parameter here is 1 then batch_size is 1.
     x_train, x_valid, y_train, y_valid = train_test_split(
-        x_train, y_train, test_size=0.2, shuffle = False, random_state = 42)
+        x_train, y_train, test_size=0.2, random_state = 42, shuffle = False)
     X_train = x_train.reshape((x_train.shape[0], 1, x_train.shape[1]))
     X_test = x_test.reshape((x_test.shape[0], 1, x_test.shape[1]))
     X_valid = x_valid.reshape((x_valid.shape[0], 1, x_valid.shape[1]))
@@ -284,7 +289,7 @@ def simpleLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print("Training Baseline LSTM...")
     tic = time.perf_counter()  # Time at start of training
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid), shuffle = False)
+              validation_data=(X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
     toc = time.perf_counter()  # Time at end of training
     loss_per_epoch = model.history.history['loss']
@@ -333,7 +338,7 @@ def bidirectionalLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neur
     print("Training Bidirectional LSTM...")
     tic = time.perf_counter()
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid), shuffle = False)
+              validation_data=(X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()
@@ -388,7 +393,7 @@ def stackedLSTM(x_train, y_train, x_test, y_test, batch_size, epochs, neurons):
     print("Training Stacked LSTM...")
     tic = time.perf_counter()
     model.fit(X_train, y_train, epochs=epochs, verbose=1,
-              validation_data=(X_valid, Y_valid), shuffle = False)
+              validation_data=(X_valid, Y_valid))
     val_loss = model.history.history['val_loss']
 
     toc = time.perf_counter()
@@ -456,27 +461,27 @@ def y_unscale(y, yhat):
     return y_pred
 
 
-def scatter3A(x, y, z):
+def scatter3A(x, y):
 
-    plt.scatter(x, y, c=z, s=100, cmap='gray')
-    plt.xlabel('Datetime')
-    plt.ylabel('Day of Week')
-    plt.yticks(np.arange(0.0, 6.0, step=1))  # Set label locations.
+    plt.scatter(x, y)
+    plt.xlabel('Day of Week')
+    plt.ylabel('Bytes')
+    plt.xticks(np.arange(0.0, 6.0, step=1))  # Set label locations.
     # Set text labels.
-    plt.yticks(np.arange(7), ['Mon', 'Tue', 'Wed',
+    plt.xticks(np.arange(7), ['Mon', 'Tue', 'Wed',
                'Thurs', 'Fri', 'Sat', 'Sun'])
-    plt.title('Bytes as a function of Time and Day of Week')
+    plt.title('Bytes vs Day of Week')
     plt.show()
 
 
-def scatter3B(x, y, z):
+def scatter3B(x, y):
 
-    plt.scatter(x, y, c=z, s=100, cmap='gray')
-    plt.xlabel('Datetime')
-    plt.ylabel('Holiday')
-    plt.yticks(np.arange(0.0, 1.0, step=1))  # Set label locations.
-    plt.yticks(np.arange(2), ['Not holiday', 'holiday'])  # Set text labels.
-    plt.title('Bytes as a function of Time and Holiday')
+    plt.scatter(x, y)
+    plt.xlabel('Holiday')
+    plt.ylabel('Bytes')
+    plt.xticks(np.arange(0.0, 1.0, step=1))  # Set label locations.
+    plt.xticks(np.arange(2), ['Not holiday', 'holiday'])  # Set text labels.
+    plt.title('Bytes vs Holiday')
     plt.show()
 
 
@@ -487,32 +492,32 @@ def heatmap(data):
 
 
 if __name__ == "__main__":
-
-    #loadData('SANREN_large.txt', 'SANREN2.txt')
-    SANREN = readData('SANREN_large.txt')
-
-    sizes = [8000, 16000, 24000, 32000]
+    data = ['SANREN040720.txt', 'SANREN050720.txt', 'SANREN060720.txt', 'SANREN070720.txt', 'SANREN080720.txt', 'SANREN090720.txt', 'SANREN100720.txt']
+    loadData(data)
+    SANREN = readData('SANREN.txt')
+    print(len(SANREN))
+    sizes = [47758]
     epochs_list = [25, 50, 75, 100, 125, 150]
     neuron_list = [50, 100]
 
     for epochs in epochs_list:
         for neurons in neuron_list:
             for size in sizes:
-                for j in range(5):
+                for j in range(1):
 
                     df = preprocess(SANREN, size)
                     df = format(df)
 
                     #Preprocessing
-                    #scatter3A(df['first-seen'], df['Day'], df['Bytes'])
-                    #scatter3B(df['first-seen'], df['Holiday'], df['Bytes'])
+                    scatter3A(df['Day'], df['Bytes'])
+                    scatter3B(df['Holiday'], df['Bytes'])
 
-                    #heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
-                    #heatmap(heatmap_df)
+                    heatmap_df = df.drop(['Datetimetemp', 'SrcIPAddr:Port', 'DstIPAddr:Port', 'Proto', 'Day', 'Weekend', 'Holiday'], axis=1).copy()
+                    heatmap(heatmap_df)
 
-                    #sns.kdeplot(df['Bytes'])
-                    #plt.title("Density of Byte Values")
-                    #plt.show()
+                    sns.kdeplot(df['Bytes'])
+                    plt.title("Density of Byte Values")
+                    plt.show()
 
                     q0 = min(df['Bytes'])
                     q1 = np.percentile(df['Bytes'], 25)
@@ -526,9 +531,9 @@ if __name__ == "__main__":
                     print('Q3: %.2f' % q3)
                     print('Max: %.2f' % q4)
 
-                    # view = input("View the distribution of the explanatory features? [Y/N]\n")
-                    # if (view == 'Y'):
-                    #     viewDistributions(df)
+                    view = input("View the distribution of the explanatory features? [Y/N]\n")
+                    if (view == 'Y'):
+                        viewDistributions(df)
 
                     x_train, y_train, x_test, y_test = split(df)
 

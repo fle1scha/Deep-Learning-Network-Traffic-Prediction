@@ -98,7 +98,7 @@ plt.legend(['Train: n = 50', 'Val: n = 50', 'Train: n = 100', 'Val: n = 100'])
 plt.ylabel('MAE')
 plt.xlabel('Epochs')
 plt.xticks(np.arange(25, 150, step=25))  # Set label locations.
-plt.title("stacked LSTM MAE vs Epochs")
+plt.title("Stacked LSTM MAE vs Epochs")
 plt.show()
 
 #stacked Model MSE vs epochs and neurons
@@ -110,7 +110,7 @@ plt.legend(['Train: n = 50', 'Val: n = 50', 'Train: n = 100', 'Val: n = 100'])
 plt.ylabel('MSE')
 plt.xlabel('Epochs')
 plt.xticks(np.arange(25, 150, step=25))  # Set label locations.
-plt.title("stacked LSTM MSE vs Epochs")
+plt.title("Stacked LSTM MSE vs Epochs")
 plt.show()
 
 #stacked Model R2 vs epochs and neurons
@@ -120,7 +120,7 @@ plt.legend(['Val: n = 50', 'Val: n = 100'])
 plt.ylabel('R2')
 plt.xlabel('Epochs')
 plt.xticks(np.arange(25, 150, step=25))  # Set label locations.
-plt.title("stacked LSTM R2 vs Epochs")
+plt.title("Stacked LSTM R2 vs Epochs")
 plt.show()
 
 print(data[' simple_lstm_train_time',' bidirectional_lstm_train_time', ' stacked_lstm_training_time'])

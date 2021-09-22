@@ -469,7 +469,6 @@ def plotDB():
     plt.title('Bytes vs Day of Week')
     plt.show()
 
-
 def plotHB():
     '''
     Plots holiday byte total vs non-holiday byte total.
@@ -502,7 +501,7 @@ def gridSearch(size, epoch_list, neuron_list, reps, x_train, y_train, x_test, y_
         for neurons in neuron_list:
                 for j in range(reps):
                     
-                    print("Now testing: ", epochs, neurons, j, size)
+                    print("Now testing:", 'epochs: ', epochs, ', neurons:', neurons, ',iteration:', j, ', observations:', size)
                     loss_simple, val_simple, yhat_train_simple, yhat_test_simple, yhat_val_simple, simple_lstm_train_time, simple_lstm_prediction_time,  simple_train_mae, simple_test_mae, simple_val_mae, simple_train_mse, simple_test_mse, simple_val_mse, simple_r2, simple_val_r2 = simpleLSTM(
                                     x_train, y_train, x_test, y_test, 1, epochs, neurons)
 
@@ -604,12 +603,8 @@ if __name__ == "__main__":
     #Create a sample with x number of bytes from each file above:
     loadData(data, 1000000)
     SANREN = readData('SANREN.txt')
-    print(len(SANREN))
-    size = 47758
-
-    #Define the hyperparameter lists for the grid-search:
-    epochs_list = [1, 2, 3, 4, 5, 6]
-    neuron_list = [5, 100]
+    print('Number of observations: ', len(SANREN))
+    size = len(SANREN)
 
     df = preprocess(SANREN, size)
     df = format(df)
@@ -633,11 +628,11 @@ if __name__ == "__main__":
         q3 = np.percentile(df['Bytes'], 75)
         q4 = max(df['Bytes'])
 
-        print('Min: %.2f' % q0)
-        print('Q1: %.2f' % q1)
-        print('Median: %.2f' % q2)
-        print('Q3: %.2f' % q3)
-        print('Max: %.2f' % q4)
+        #print('Min: %.2f' % q0)
+        #print('Q1: %.2f' % q1)
+        #print('Median: %.2f' % q2)
+        #print('Q3: %.2f' % q3)
+        #print('Max: %.2f' % q4)
 
         viewDistributions(df)
 
@@ -648,12 +643,35 @@ if __name__ == "__main__":
     x_test_scaled = scale(x_test)
     y_test_scaled = scale(y_test)
 
+    #Define the hyperparameter lists for the grid-search:
+
+    print("\nYou will now be asked to define the ranges of the LSTM hyperparameter grid search.")
+    epochs_list = []
+    epochs = input("Please enter the first epoch gridsearch hyperparameter value: ")
+    while (epochs != 'DONE'):
+        epochs_list.append(int(epochs))
+        epochs = input("Please enter another epoch gridsearch hyperparameter value or type DONE to continue: ")
+    
+    neuron_list = []
+    neurons = input("Please enter the first neuron gridsearch hyperparameter value: ")
+    while (neurons != 'DONE'):
+        neuron_list.append(int(neurons))
+        neurons = input("Please enter another neuron gridsearch hyperparameter value or type DONE to continue: ")
+    
+    reps = int(input("How many times would you like each gridsearch permutation to run? "))
+
+    print('Now grid searching over:')
+    print('Epochs:',epochs_list)
+    print('Neurons:',neuron_list)
+    print('Reps per permutation:', reps)
+    
+
     #Create new file that LSTM training data can be written to:
     with open('train_data.csv', 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['dataset_size', 'epochs', 'neurons', 'simple_lstm_train_time','bidirectional_lstm_train_time', 'stacked_lstm_training_time', 'simple_train_mae', 'simple_val_mae', 'bidirectional_train_mae', 'bidirectional_val_mae', 'stacked_train_mae', 'stacked_val_mae', 'simple_train_mse', 'simple_val_mse', 'bidirectional_train_mse', 'bidirectional_val_mse', 'stacked_train_mse', 'stacked_val_mse', 'simple_val_r2', 'bi_val_r2', 'stacked_val_r2',])
     f.close()
-    gridSearch(size, epochs_list, neuron_list, 1, x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
+    gridSearch(size, epochs_list, neuron_list, reps, x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
 
     #Based on results, define optimal model hyperparameters:
     x = input("Enter selected optimal simple LSTM epoch hyperparameter: ")

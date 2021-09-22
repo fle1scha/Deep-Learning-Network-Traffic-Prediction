@@ -1,4 +1,6 @@
 ## Deep Learning for Network Traffic Prediction
+### Using LSTMs as Network Traffic Predictors on SANReN
+#### Antony Fleischer and Justin Myerson
 The Deep Learning for Network Traffic Prediction (DL4NTP) system is split into two files: DL4NTP.py, which preprocceses the data and implements the models; and dataAnalysis.py, which extracts data and metrics from the models so that the results can be evaluated.
 
 1. To run the DL4NTP.py and dataAnalysis.py program, a user should have the following packages installed:
@@ -25,7 +27,7 @@ The Deep Learning for Network Traffic Prediction (DL4NTP) system is split into t
     python3 dataAnalysis.py
     ```
 
-    Note: the dataAnalysis file will not run succesfully if the DL4NTP program has not completed LSTM model training.
+    NOTE: the dataAnalysis file will not run succesfully if the DL4NTP program has not completed LSTM model training.
 
 3. The user will be asked for prompts in the command line as the program run. Example answers to each input are provided below:
 ```
@@ -52,4 +54,10 @@ Simple LSTM model succesfully defined.
 ```
 The output of each model's prediction will be shown in a plot. Please close it to continue with the prediction of the next model. 
 
-5. The dataAnalysis.py file sets up plots of MAE, MSE and R2 across the range of hyperparameters. The x-ticks of each plot have been coded according to the hyperparameter ranges of the actual project. If a graph is not showing on your hyperparameter ranges, you can adjust the ```plt.xticks()``` function to match the range of your inputs. 
+5. The DL4NTP program writes to the files ```train_data.csv``` and ```test_data.csv```. However, it also starts the files anew every time the program runs. This can be changed by answering the prompt below:
+```
+Would you like to start new training and test data files, or amend them? Please type 'w' for new files, and 'a' to amend existing data: 
+```
+NOTE: The standard behaviour is to write new files, as this is necessary the first time the progarm is run. A user of input of neither 'w' or 'a' will cause use the write default setting, which may cause headers to be re-written. 
+
+6. The dataAnalysis.py file sets up plots of MAE, MSE and R2 across the range of hyperparameters. The x-ticks of each plot have been coded according to the hyperparameter ranges of the actual project. If a graph is not showing on your hyperparameter ranges, you can adjust the ```plt.xticks()``` function to match the range of your inputs. 

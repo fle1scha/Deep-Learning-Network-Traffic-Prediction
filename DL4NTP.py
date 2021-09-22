@@ -599,7 +599,7 @@ if __name__ == "__main__":
 
     #Input all of the SANREN files you wish to read from:
     data = ['SANREN040720.txt', 'SANREN050720.txt', 'SANREN060720.txt', 'SANREN070720.txt', 'SANREN080720.txt', 'SANREN090720.txt', 'SANREN100720.txt'] 
-    
+    print("Please refer to the README before running this program.")
     #Create a sample with x number of bytes from each file above:
     loadData(data, 1000000)
     SANREN = readData('SANREN.txt')
@@ -665,12 +665,16 @@ if __name__ == "__main__":
     print('Neurons:',neuron_list)
     print('Reps per permutation:', reps)
     
-
+    write = input('Would you like to start new training and test data files, or amend them? Please type \'w\' for new files, and \'a\' to amend existing data: ')
     #Create new file that LSTM training data can be written to:
-    with open('train_data.csv', 'w', newline='') as f:
+    if (write == 'a'):
+        pass
+    else:
+        with open('train_data.csv', 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['dataset_size', 'epochs', 'neurons', 'simple_lstm_train_time','bidirectional_lstm_train_time', 'stacked_lstm_training_time', 'simple_train_mae', 'simple_val_mae', 'bidirectional_train_mae', 'bidirectional_val_mae', 'stacked_train_mae', 'stacked_val_mae', 'simple_train_mse', 'simple_val_mse', 'bidirectional_train_mse', 'bidirectional_val_mse', 'stacked_train_mse', 'stacked_val_mse', 'simple_val_r2', 'bi_val_r2', 'stacked_val_r2',])
-    f.close()
+        f.close()
+
     gridSearch(size, epochs_list, neuron_list, reps, x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
 
     #Based on results, define optimal model hyperparameters:
@@ -690,10 +694,13 @@ if __name__ == "__main__":
     hyperparams_stack = [int(x), int(y)]
 
     #Create new file that LSTM test data can be written to:
-    with open('test_data.csv', 'w', newline='') as f:
+    if (write == 'a'):
+        pass
+    else:
+        with open('test_data.csv', 'w', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(['name', 'size', 'epochs', 'neurons', 'test_mae', 'test_mse', 'r2', 'lstm_prediction_time'])
-    f.close()
+        f.close()
 
      
     optimalSimple(size, hyperparams_simple[0], hyperparams_simple[1], x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)

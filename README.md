@@ -44,8 +44,7 @@ Please enter the first epoch gridsearch hyperparameter value: 5
 
 Please enter another epoch gridsearch hyperparameter value or type DONE to continue: DONE
 ```
-As the model training process is only run once, the range of hyperparameters that the grid search uses are defined at the beginning the program, whilst the optimal model selection hyperparameters are defined through user input after training. 
-
+As the model training process is only run once, the range of hyperparameters that the grid search uses are defined at the beginning the program, whilst the optimal model selection hyperparameters are defined through user input after training. The DL4NTP study used a hyperparameter set of {Epochs: 25, 50, 75, 100, 125, 150; Neurons: 50, 100; Reps: 1}. NOTE: these settings were causing training times over almost 3 hours. 
 ```
 Enter selected optimal simple LSTM epoch hyperparameter: 1 
 Enter selected optimal simple LSTM neuron hyperparameter: 1000

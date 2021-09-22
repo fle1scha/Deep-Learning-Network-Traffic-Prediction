@@ -46,4 +46,11 @@ Please enter another epoch gridsearch hyperparameter value or type DONE to conti
 ```
 As the model training process is only run once, the range of hyperparameters that the grid search uses are defined at the beginning the program, whilst the optimal model selection hyperparameters are defined through user input after training. 
 
+```
+Enter selected optimal simple LSTM epoch hyperparameter: 1 
+Enter selected optimal simple LSTM neuron hyperparameter: 1000
+Simple LSTM model succesfully defined.
+```
+The output of each model's prediction will be shown in a plot. Please close it to continue with the prediction of the next model. 
+
 5. The dataAnalysis.py file sets up plots of MAE, MSE and R2 across the range of hyperparameters. The x-ticks of each plot have been coded according to the hyperparameter ranges of the actual project. If a graph is not showing on your hyperparameter ranges, you can adjust the ```plt.xticks()``` function to match the range of your inputs. 

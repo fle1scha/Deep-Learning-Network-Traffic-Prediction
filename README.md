@@ -1,31 +1,28 @@
-# DL4NTP
-## Ant To-Do:
-1. Combine Date and first-seen - DONE
-- Find way to get new Datetime variable into milliseconds or ordinal encoding - DONE
-2. Define binary holiday variable. 
-3. Fix preprocessing for SANREN[300something] - DONE
-4. Set limit on one-hot encoding unqiue values based off literature.
-5. Determine how to get LSTM to predict other variables. 
-6. Hyperparameter optimisation via literature.
+## Deep Learning for Network Traffic Prediction
+The Deep Learning for Network Traffic Prediction (DL4NTP) system is split into two files: DL4NTP.py, which preprocceses the data and implements the models; and dataAnalysis.py, which extracts data and metrics from the models so that the results can be evaluated.
 
-## Research Questions to Answer
-1. How does the SANReN traffic data vary with time
-and day in relation to the South African university
-calendar?
-2. Which of the LSTM architectures, baseline, bilateral
-or stacked, provides the highest prediction accuracy,
-subject to network constraints? - Stacked highest, Bidirectional lowest
-3. What is the computational cost of different LSTM? - Simple lowest, Stacked highest
+1. To run the DL4NTP.py and dataAnalysis.py program, a user should have the following packages installed:
+    ```
+    import tensorflow as tf
+    import math
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import os
+    import pandas as pd
+    import datetime as dt
+    import time
+    import csv
+    import seaborn as sns
+    import keras.backend as K
+    ```
 
-## Theory
-1. Deep Learning Basics https://colab.research.google.com/github/lexfridman/mit-deep-learning/blob/master/tutorial_deep_learning_basics/deep_learning_basics.ipynb
-2. Adam Optimization https://www.coursera.org/lecture/deep-neural-network/adam-optimization-algorithm-w9VCZ?utm_campaign=The%20Batch&utm_medium=email&_hsmi=148614359&utm_content=148611472&utm_source=hs_email
-3. Illustrated Guide to LSTMs https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21
-4. Understanding LSTMS https://colah.github.io/posts/2015-08-Understanding-LSTMs/
-5. Performance Metrics in Machine Learning [Complete Guide] https://neptune.ai/blog/performance-metrics-in-machine-learning-complete-guide
+2. To run either file, enter the following command in a terminal application:
+    ```
+    python3 DL4NTP.py
+    ```
+    or
+    ```
+    python3 dataAnalysis.py
+    ```
 
-## Final Paper to-do's
-1. Try a new dataset
-2. Change loss to validation loss
-3. Change percentage of validation loss
-4. Table of metrics
+    Note: the dataAnalysis file will not run succesfully if the DL4NTP program has not completed LSTM model training.

@@ -18,7 +18,7 @@ The Deep Learning for Network Traffic Prediction (DL4NTP) system is split into t
     import keras.backend as K
     ```
 
-2. To run either file, enter the following command in a terminal application:
+2. To run either file, enter the following command in a terminal application. The user must have the SANREN.txt file in the same directory as the program.
     ```
     python3 DL4NTP.py
     ```

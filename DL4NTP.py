@@ -598,10 +598,10 @@ def optimalStacked(size, epochs, neurons, x_train, y_train, x_test, y_test):
 if __name__ == "__main__":
 
     #Input all of the SANREN files you wish to read from:
-    data = ['SANREN040720.txt', 'SANREN050720.txt', 'SANREN060720.txt', 'SANREN070720.txt', 'SANREN080720.txt', 'SANREN090720.txt', 'SANREN100720.txt'] 
+    #data = ['SANREN040720.txt', 'SANREN050720.txt', 'SANREN060720.txt', 'SANREN070720.txt', 'SANREN080720.txt', 'SANREN090720.txt', 'SANREN100720.txt'] 
     print("Please refer to the README before running this program.")
     #Create a sample with x number of bytes from each file above:
-    loadData(data, 1000000)
+    #loadData(data, 1000000)
     SANREN = readData('SANREN.txt')
     print('Number of observations: ', len(SANREN))
     size = len(SANREN)
@@ -706,3 +706,5 @@ if __name__ == "__main__":
     optimalSimple(size, hyperparams_simple[0], hyperparams_simple[1], x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
     optimalBi(size, hyperparams_bi[0], hyperparams_bi[1], x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
     optimalStacked(size, hyperparams_stack[0], hyperparams_stack[1], x_train_scaled, y_train_scaled, x_test_scaled, y_test_scaled)
+
+    print("The program is complete. Please see the train_data.csv and test_data.csv files to evaluate the training and prediction processes.")
